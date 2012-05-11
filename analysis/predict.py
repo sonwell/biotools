@@ -1,7 +1,8 @@
 #!/usr/bin/python
-import biotools.sequence as sequ
-import biotools.annotation as anno
-import biotools.BLAST as BLAST
+import biotools.IO               as io
+import biotools.sequence         as sequ
+import biotools.annotation       as anno
+import biotools.BLAST            as BLAST
 import biotools.analysis.options as options
 from biotools.align import *
 from biotools.translate import *
@@ -95,9 +96,9 @@ BLASTs database against sequences, and for those results that pass the length an
 	try: os.mkdir(wd + 'aa' + sep)
 	except: pass
 
-	subj = sequ.dict(db)
+	subj = dict((s.name, s) for s in io.open(db, 'r'))
 
-	try: orfs = {s.name:[orf for orf in ORFGenerator(s)] for s in sequ.open(sequences, 'r')}
+	try: orfs = {s.name:[orf for orf in ORFGenerator(s)] for s in io.open(sequences, 'r')}
 	except IOError:
 		print "%d: No file \"" + sequences + ",\" skipping."
 		return	
@@ -130,9 +131,9 @@ BLASTs database against sequences, and for those results that pass the length an
 			seqs[ seq.seq ].add( seq )
 		except: break
 
-	fh = sequ.open( wd + 'nt' + sep + pref + '.fastc', 'w' )
-	ah = sequ.open( wd + 'aa' + sep + pref + '.fastc', 'w' )
-	gh = anno.open( wd + pref + '.gff3', 'w' )
+	fh = io.open( wd + 'nt' + sep + pref + '.fastc', 'w' )
+	ah = io.open( wd + 'aa' + sep + pref + '.fastc', 'w' )
+	gh = io.open( wd + pref + '.gff3', 'w' )
 
 	sa = sequ.annotation
 	for id in seqs:

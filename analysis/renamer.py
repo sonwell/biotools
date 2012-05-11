@@ -1,5 +1,5 @@
 import os, sys
-import biotools.sequence as sequ
+import biotools.IO as io
 import options
 
 def rename(direc, db):
@@ -12,9 +12,9 @@ This isn't really for bioinformatics, this is more for the pipeline, to rename t
 
 	names = []
 	files = [f for f in os.listdir(nt_dir) if f[-6:] == ".fasta"]
-	seqdb = dict((s.name.split("|")[1],s) for s in sequ.open(db, 'r'))
+	seqdb = dict((s.name.split("|")[1],s) for s in io.open(db, 'r'))
 	for f in files:
-		seq = sequ.open(nt_dir+f, 'r').next()
+		seq = io.open(nt_dir+f, 'r').next()
 		ids = seq.defline.split(', ')
 		print "File\033[33;1m", f, "\033[0mis described by the following effectors:"
 		try:
