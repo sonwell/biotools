@@ -187,9 +187,10 @@ Opens file name with mode mode. This function will attempt to guess at the filet
 
 Recoginized file extensions include fa, fsa, fas, fasta, fastc, fastq, clustalw, clustal, aln.'''
 
+		self.file   = name
 		self.handle = __builtin__.open(name, mode)
 		self.method = self.methods.default
-		self.type = None
+		self.type   = None
 
 		suffixes = {'fsa': 'fasta', 'fa':  'fasta',
 		            'fs': 'fasta',  'fas': 'fasta',
@@ -204,7 +205,7 @@ Recoginized file extensions include fa, fsa, fas, fasta, fastc, fastq, clustalw,
 			ext = name[p+1:]
 			if ext in suffixes:
 				try:
-					self.format(self.seqtype)
+					self.format(suffixes[ext])
 					return
 				except ValueError:
 					pass
@@ -223,11 +224,11 @@ Recoginized file extensions include fa, fsa, fas, fasta, fastc, fastq, clustalw,
 Forces a file to be parsed as a particular format. By default, the values for fmt can be fasta, fastq, or fastc.'''
 		if fmt in self.methods:
 			method = self.methods[fmt]
-			ret = method['probe'](__builtin__.open(name, 'r'))
+			ret = method['probe'](__builtin__.open(self.file, 'r'))
 			if ret:
 				self.method = method
 				for key in ret:
-					object.__setitem__(self, key, ret[key])
+					object.__setattr__(self, key, ret[key])
 				return self
 			else: raise ValueError, "File cannot be parsed as type %s." % fmt
 		self.method = self.methods.default
