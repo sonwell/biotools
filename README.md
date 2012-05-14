@@ -154,7 +154,20 @@ Modules used in Bart, Rebecca *et al.* _PNAS Plus_.
 `biotools.analysis.cluster`
 ---------------------------
 
-`run()`\:
+`_run_clustal(q, clusters, direc)`\: takes a queue of clusters and a dictionary of all of the clusters from each of the inputs from `run` and generates fasta files to be used in a ClustalW alignment.
+
+`run(direc, inputs)`\: generates a set of clusters of sequences based on the presence of these sequences in each of the `inputs`, which are fastc files. Sequence IDs are obtained for each cluster in each input. The resulting clusters are those where for each input, each of the sequences in the cluster are also in the same input cluster or are absent from the input. That is,
+    >seq1 input1
+    >seq2 input1
+    ...
+
+    >seq1 input2
+    ...
+    >seq2 input2
+    ...
+
+will generate clusters `{seq1}, {seq2}` because `input2` has distinct sequences for `seq1` and `seq2` and thus cannot be placed in the same cluster as with `input1`. Instead, we split up `seq1` and `seq2` from `input1` to match `input2`. 
+
 
 `biotools.analysis.options`
 ---------------------------
