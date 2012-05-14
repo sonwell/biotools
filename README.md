@@ -157,6 +157,7 @@ Modules used in Bart, Rebecca *et al.* _PNAS Plus_.
 `_run_clustal(q, clusters, direc)`\: takes a queue of clusters and a dictionary of all of the clusters from each of the inputs from `run` and generates fasta files to be used in a ClustalW alignment.
 
 `run(direc, inputs)`\: generates a set of clusters of sequences based on the presence of these sequences in each of the `inputs`, which are fastc files. Sequence IDs are obtained for each cluster in each input. The resulting clusters are those where for each input, each of the sequences in the cluster are also in the same input cluster or are absent from the input. That is,
+
     >seq1 input1
     >seq2 input1
     ...
