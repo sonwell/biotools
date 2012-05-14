@@ -229,5 +229,32 @@ given clustalw alignment. These data are:
 * `starts`\: the starting positions for each gene model in amino acids,
 * `ends`\: the ending positions for each gene model in amino acids, and
 * `counts`\: the number of sequences with a particular gene model.
-The values given in `starts`, `ends`, and `counts` are sorted to that the nth element in `starts` corresponds to the nth value in `ends` and the nth value 
-in `counts`.
+The values given in `starts`, `ends`, and `counts` are sorted to that the nth element in `starts` corresponds to the nth value in `ends` and the nth value in `counts`.
+
+`prok-geneseek`
+===============
+
+`prok-geneseek` is a command-line utility that is installed onto your system when you install biotools via [pip](http://www.pip-installer.org). It glues the pieces of the analysis into a single tool.
+
+    Usage: prok-geneseek [options] <database> <sequences ...>
+
+    Options:
+      -h, --help            show this help message and exit
+      -S START, --start=START
+                            define a start codon [default: -S ATG]
+      -E STOP, --stop=STOP  define a stop codon [default: -E TAG -E TAA -E TGA]
+      -j THREADS, --threads=THREADS
+                            number of threads [default: 16]
+      -p PROCESSES, --processes=PROCESSES
+                            number of parallel processes to run [default: 2]
+      -e EVALUE, --evalue=EVALUE
+                            maximum e-value [default: 1e-30]
+      -I IDENTITY, --identity=IDENTITY
+                            minimum percent identity [default: 0.45]
+      -L FRACTION, --length=FRACTION
+                            allowable relative error in hit length (|hit-ref|/ref)
+                            [default: 0.2]
+      -d DIRECTORY, --directory=DIRECTORY
+                            minimum percent length [default: current]
+      -P PLOTTER, --plotter=PLOTTER
+                            plotting module [default: biotools.analysis.plot]
