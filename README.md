@@ -160,17 +160,17 @@ Modules used in Bart, Rebecca *et al.* _PNAS Plus_.
 ---------------------------
 
 Globals:
-* LENGTH\_ERR\: maximum allowable relative error for hit length (default: 0.2)
-* MAX\_EVALUE\: maximum e-value (default: 1e-30)
-* MIN\_IDENTITY\: minimum identity (default: 0.45)
-* NUM\_THREADS\: number of threads (default: 16)
-* NUM\_PROCESSES\: number of parallel processes (default: 2)
-* PLOTTER\: plotting module name (default: biotools.analysis.plot)
-* DIRECTORY\: directory to save results (default: current directory)
+* `LENGTH_ERR`\: maximum allowable relative error for hit length (default: 0.2)
+* `MAX_EVALUE`\: maximum e-value (default: 1e-30)
+* `MIN_IDENTITY`\: minimum identity (default: 0.45)
+* `NUM_THREADS`\: number of threads (default: 16)
+* `NUM_PROCESSES`\: number of parallel processes (default: 2)
+* `PLOTTER`\: plotting module name (default: biotools.analysis.plot)
+* `DIRECTORY`\: directory to save results (default: current directory)
 
-* START\_CODONS\: start codons (default: ATG)
-* STOP\_CODONS\: stop codons (default: TAG, TAA, TGA)
-* args\: additional remaining arguments 
+* `START_CODONS`\: start codons (default: ATG)
+* `STOP_CODONS`\: stop codons (default: TAG, TAA, TGA)
+* `args`\: additional remaining arguments 
 
 `parse(pargs)`\: parse pargs and set the global variables.
 
@@ -184,9 +184,9 @@ Globals:
 
 `ORFGenerator(sequence)`\: scans both strands of the given sequence for ORFs, and yields them one by one.
 
-`\_genepredict\_target(qin, qout, orfs, subj)`\: obtains BLAST results from `qin` and searches `orfs` for ORFs that are in range (see below) and determines the best-aliging ORF subsequence (see `biotools.align`) and adds it to `qout` if it meets the minimum requirements (see `biotools.analysis.options`).
+`_genepredict_target(qin, qout, orfs, subj)`\: obtains BLAST results from `qin` and searches `orfs` for ORFs that are in range (see below) and determines the best-aliging ORF subsequence (see `biotools.align`) and adds it to `qout` if it meets the minimum requirements (see `biotools.analysis.options`).
 
-`\_genepredict\_in\_range(seq, start, end)`\: returns True if the given sequence spans the range (`start`, `end`).
+`_genepredict_in_range(seq, start, end)`\: returns True if the given sequence spans the range (`start`, `end`).
 
 `GeneFromBLAST(db, sequences, pref)`\: begins BLAST between `db` and `sequences`. Results are sent to \_genepredict\_target, and good hits are saved to disk as protein, nucleotide, and gff files.
 
@@ -200,7 +200,7 @@ Globals:
 `biotools.analysis.run`
 -----------------------
 
-`\_run\_genepredict(q, infile)`\: runs a single instance of `biotools.analysis.predict`.
+`_run_genepredict(q, infile)`\: runs a single instance of `biotools.analysis.predict`.
 
 `run()`\: runs several (see `biotools.analysis.options`) instances of `\_run\_genepredict` at once.
 
