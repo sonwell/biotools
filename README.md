@@ -13,6 +13,8 @@ A bunch of bioinformatics tools.
 `biotools.annotation`
 ---------------------
 
+`_parseAttrs(attr, token='=')`\: creates a dictionary from the attributes (9th column) of a gff file. By default, token is '=', which is the separator used in gff version 3.
+
 `biotools.BLAST`
 ----------------
 
