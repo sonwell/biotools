@@ -15,7 +15,7 @@ A bunch of bioinformatics tools.
 
 `_parseAttrs(attr, token='=')`\: creates a dictionary from the attributes (9th column) of a gff file. By default, token is '=', which is the separator used in gff version 3.
 
-`Annotation(self, ref, src, type, start, end, score, strand, phase, attr, name\_token='ID', 'gff\_token')`\: constructs an `Annotation` object with the necessary values. The parameters are passed in the same order as the columns from a GFF (version 3) file and the `name\_token` and `gff\_token` parameters are the defaults for a gff version 3 file from phytozome. Just write (e.g.) `Annotation(\*line.split('\\t')) #(splitting on tabs)`, and the rest of the work will be done for you. Other sources may require changes to `name\_tokens` and `gff\_token`.
+`Annotation(self, ref, src, type, start, end, score, strand, phase, attr, name_token='ID', 'gff_token')`\: constructs an `Annotation` object with the necessary values. The parameters are passed in the same order as the columns from a GFF (version 3) file and the `name_token` and `gff_token` parameters are the defaults for a gff version 3 file from phytozome. Just write (e.g.) `Annotation(*line.split('\t')) #(splitting on tabs)`, and the rest of the work will be done for you. Other sources may require changes to `name_tokens` and `gff_token`.
 
 Instantiating an Annotation will generate for it an id of the form *SEQNAME*\_*TYPE*[*START*\:*END*], where *SEQNAME* is the name of the sequence (column 1) from the GFF file, and *TYPE* is like 'gene' or 'CDS'. If no *SEQNAME* is provided, then 'X' be used in its place, and if no identifier can be found in the attributes, the `Annotation` will generate an identifier for itself in the form of '*unknown #*'.
 
@@ -98,7 +98,7 @@ and others that are specific to the particular file type.
 
 `IOManager(self, methods=None)`\: a class used by the `IOBase` class to manage the various input and output methods for the different file types. Additional file types can be added to the manager by using `manager[format] = methods`.
 
-From the above example, methods is a dictionary with keys rhook, read, whook    , write, and probe. Each of the values must be callable object:
+From the above example, methods is a dictionary with keys `rhook`, `read`, `whook`, `write`, and `probe`. Each of the values must be callable object:
 * `rhook`\: takes a file handle, opened for reading; called before reading of the file has begun,
 * `whook`\: takes a file handle, opened for writing; called before writing to the file has begun,
 * `read`\: takes a file handle, opened for reading; should be a generator that yields entries,
@@ -177,7 +177,7 @@ Globals:
 `biotools.analysis.plot`
 ------------------------
 
-`plot(snpdata, directory, bottom=True, side=True, legend=True, filename='untitled.pdf', \*\*kwargs)`\: uses matplotlib to plot the sequence variance (`snpdata`) into a pdf in `directory` with under the name `filename`. This code can be used to generate multiple subfigures in the same figure using the booleans `bottom`, `side`, and `lengend` to draw or hide the x-axis, y-axis, and legend, respectively.
+`plot(snpdata, directory, bottom=True, side=True, legend=True, filename='untitled.pdf', **kwargs)`\: uses matplotlib to plot the sequence variance (`snpdata`) into a pdf in `directory` with under the name `filename`. This code can be used to generate multiple subfigures in the same figure using the booleans `bottom`, `side`, and `lengend` to draw or hide the x-axis, y-axis, and legend, respectively.
 
 `biotools.analysis.predict`
 ---------------------------
@@ -188,9 +188,9 @@ Globals:
 
 `_genepredict_in_range(seq, start, end)`\: returns True if the given sequence spans the range (`start`, `end`).
 
-`GeneFromBLAST(db, sequences, pref)`\: begins BLAST between `db` and `sequences`. Results are sent to \_genepredict\_target, and good hits are saved to disk as protein, nucleotide, and gff files.
+`GeneFromBLAST(db, sequences, pref)`\: begins BLAST between `db` and `sequences`. Results are sent to `_genepredict_target`, and good hits are saved to disk as protein, nucleotide, and gff files.
 
-`run(\*args)`\: simple wrapper for GeneFromBLAST that verifies the correct number of arguments are passed.
+`run(*args)`\: simple wrapper for GeneFromBLAST that verifies the correct number of arguments are passed.
 
 `biotools.analysis.renamer`
 ---------------------------
@@ -202,7 +202,7 @@ Globals:
 
 `_run_genepredict(q, infile)`\: runs a single instance of `biotools.analysis.predict`.
 
-`run()`\: runs several (see `biotools.analysis.options`) instances of `\_run\_genepredict` at once.
+`run()`\: runs several (see `biotools.analysis.options`) instances of `_run_genepredict` at once.
 
 `biotools.analysis.variance`
 ----------------------------
