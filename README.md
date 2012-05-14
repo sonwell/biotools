@@ -71,10 +71,10 @@ Recognized file extension include fa, fsa, fas, fasta, fastc, fastq, clusalw, cl
 `IOBase` has a class property, `methods`, which is an `IOManager` (see `biotools.iomanager`).
 
 An `IOBase` instance has the following attributes:
-* file
-* handle
-* method
-* type
+* `file`
+* `handle`
+* `method`
+* `type`
 and others that are specific to the particular file type.
 
 `IOBase.format(self, fmt)`\: tries to parse the file as a file of type `fmt`. If it cannot, it will not read the file.
@@ -99,11 +99,11 @@ and others that are specific to the particular file type.
 `IOManager(self, methods=None)`\: a class used by the `IOBase` class to manage the various input and output methods for the different file types. Additional file types can be added to the manager by using `manager[format] = methods`.
 
 From the above example, methods is a dictionary with keys rhook, read, whook    , write, and probe. Each of the values must be callable object:
-* rhook\: takes a file handle, opened for reading; called before reading of the file has begun,
-* whook\: takes a file handle, opened for writing; called before writing to the file has begun,
-* read\: takes a file handle, opened for reading; should be a generator that yields entries,
-* write\: takes a file handle, opened for writing and a single entry; writes the entry to the file,
-* probe\: takes a file handle, opened for reading; returns a dictionary of attributes to be applied to the `IOBase` instance.
+* `rhook`\: takes a file handle, opened for reading; called before reading of the file has begun,
+* `whook`\: takes a file handle, opened for writing; called before writing to the file has begun,
+* `read`\: takes a file handle, opened for reading; should be a generator that yields entries,
+* `write`\: takes a file handle, opened for writing and a single entry; writes the entry to the file,
+* `probe`\: takes a file handle, opened for reading; returns a dictionary of attributes to be applied to the `IOBase` instance.
 
 This class behaves similarly to a dictionary, except that the `get` method will default to the default method (which does nothing) if no truthy second parameter is passed.
 
@@ -115,24 +115,24 @@ This class behaves similarly to a dictionary, except that the `get` method will 
 `Sequence(self, name, seq, **kwargs)`\: instantiates a `Sequence` object with sequence `seq`. 
 
 A sequence object has attributes
-* name
-* seq
-* qual
-* type
-* start
-* end
-* step
-* original
-* defline
+* `name`
+* `seq`
+* `qual`
+* `type`
+* `start`
+* `end`
+* `step`
+* `original`
+* `defline`
 
 Some other useful parameters that the Sequence constructor can handle are:
-* qual        => the quality scores (an array of integers) of the sequence,
-* type        => the type of the sequence, either 'prot' or 'nucl',
-* start       => the starting position of the sequence within a supersequence,
-* end         => the ending position of the sequnece within a supersequence,
-* step        => the 'step' of the sequence, usually +1 for top-strand sequences, and -1 for bottom-strand sequences, but can handle other values as well,
-* original    => the original Sequence object from which this one derives,
-* defline     => the definition line for this sequence from a fasta file.
+* `qual`\: the quality scores (an array of integers) of the sequence,
+* `type`\: the type of the sequence, either 'prot' or 'nucl',
+* `start`\: the starting position of the sequence within a supersequence,
+* `end`\: the ending position of the sequnece within a supersequence,
+* `step`\: the 'step' of the sequence, usually +1 for top-strand sequences, and -1 for bottom-strand sequences, but can handle other values as well,
+* `original`\: the original Sequence object from which this one derives,
+* `defline`\: the definition line for this sequence from a fasta file.
 If one of these are not given, they will default to the most logical value that can be determined from the other values and sequence (e.g., if `end` < `start`, then step is probably -1).
 
 A subsequence can be constructed using the `seq[start:stop:step]` syntax. The length can be calculated using `len`. Instances have a method `upper`, but it doesn't do anything since all sequences are made upper-case upon instantiation. Sequences can be hashed and tested for equivalence and casted to a string (which will render either a fasta entry or a fastq entry depending on the presence of quality scores).
@@ -144,7 +144,7 @@ The bases or residues of the sequence can be iterated over by writing, e.g., `fo
 `biotools.translate`
 --------------------
 
-`translate(x)`\: Translate a nucleotide sequence using the standard genetic code. The sequence parameter can be either a string or a `Sequence` (see `biotools.sequence`) object. Stop codons are denoted with an asterisk (*).
+`translate(x)`\: Translate a nucleotide sequence using the standard genetic code. The sequence parameter can be either a string or a `Sequence` (see `biotools.sequence`) object. Stop codons are denoted with an asterisk (\*).
 
 `biotools.analysis`
 ===================
@@ -154,20 +154,66 @@ Modules used in Bart, Rebecca *et al.* _PNAS Plus_.
 `biotools.analysis.cluster`
 ---------------------------
 
+`run()`\:
+
 `biotools.analysis.options`
 ---------------------------
+
+Globals:
+* LENGTH\_ERR\: maximum allowable relative error for hit length (default: 0.2)
+* MAX\_EVALUE\: maximum e-value (default: 1e-30)
+* MIN\_IDENTITY\: minimum identity (default: 0.45)
+* NUM\_THREADS\: number of threads (default: 16)
+* NUM\_PROCESSES\: number of parallel processes (default: 2)
+* PLOTTER\: plotting module name (default: biotools.analysis.plot)
+* DIRECTORY\: directory to save results (default: current directory)
+
+* START\_CODONS\: start codons (default: ATG)
+* STOP\_CODONS\: stop codons (default: TAG, TAA, TGA)
+* args\: additional remaining arguments 
+
+`parse(pargs)`\: parse pargs and set the global variables.
 
 `biotools.analysis.plot`
 ------------------------
 
+`plot(snpdata, directory, bottom=True, side=True, legend=True, filename='untitled.pdf', \*\*kwargs)`\: uses matplotlib to plot the sequence variance (`snpdata`) into a pdf in `directory` with under the name `filename`. This code can be used to generate multiple subfigures in the same figure using the booleans `bottom`, `side`, and `lengend` to draw or hide the x-axis, y-axis, and legend, respectively.
+
 `biotools.analysis.predict`
 ---------------------------
+
+`ORFGenerator(sequence)`\: scans both strands of the given sequence for ORFs, and yields them one by one.
+
+`\_genepredict\_target(qin, qout, orfs, subj)`\: obtains BLAST results from `qin` and searches `orfs` for ORFs that are in range (see below) and determines the best-aliging ORF subsequence (see `biotools.align`) and adds it to `qout` if it meets the minimum requirements (see `biotools.analysis.options`).
+
+`\_genepredict\_in\_range(seq, start, end)`\: returns True if the given sequence spans the range (`start`, `end`).
+
+`GeneFromBLAST(db, sequences, pref)`\: begins BLAST between `db` and `sequences`. Results are sent to \_genepredict\_target, and good hits are saved to disk as protein, nucleotide, and gff files.
+
+`run(\*args)`\: simple wrapper for GeneFromBLAST that verifies the correct number of arguments are passed.
 
 `biotools.analysis.renamer`
 ---------------------------
 
+`rename(direc, db)`\: searches through `direc` for files with a fastc extension and renames them according to user input. The user is given descriptions of the sequences contained within the fastc file from sequences in the `db` file.
+
 `biotools.analysis.run`
 -----------------------
 
+`\_run\_genepredict(q, infile)`\: runs a single instance of `biotools.analysis.predict`.
+
+`run()`\: runs several (see `biotools.analysis.options`) instances of `\_run\_genepredict` at once.
+
 `biotools.analysis.variance`
 ----------------------------
+
+`var(strain, fmt)`\: returns plotdata and metadata for plotting later on in the pipeline.
+
+`SaySNPs(input)`\: takes a clustalw alignment and will return a dictionary of data relevent to plotting the sequence variance for the sequences in the
+given clustalw alignment. These data are:
+* `var`\: the measure of sequence variation,
+* `starts`\: the starting positions for each gene model in amino acids,
+* `ends`\: the ending positions for each gene model in amino acids, and
+* `counts`\: the number of sequences with a particular gene model.
+The values given in `starts`, `ends`, and `counts` are sorted to that the nth element in `starts` corresponds to the nth value in `ends` and the nth value 
+in `counts`.
