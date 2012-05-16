@@ -5,14 +5,9 @@ import os, sys
 
 def run(db,sfile,**kwargs):
 	'''BLAST(database, query, **params)
-This function takes a database and a query and runs the appropriate type of
-BLAST on them. The database can be an existing BLAST database or a fasta/fastq
-file. If it is a sequence file, this function will look in the places where BLAST
-would look for an existing database created from that file and use that instead.
-If there is no such database, this function will make one for you and then use the
-newly created database with BLAST. 
+This function takes a database and a query and runs the appropriate type of BLAST on them. The database can be an existing BLAST database or a fasta/fastq file. If it is a sequence file, this function will look in the places where BLAST would look for an existing database created from that file and use that instead. If there is no such database, this function will make one for you and then use the newly created database with BLAST. 
 
-Optional named arguments can currently only be evalue.'''
+Optional named arguments can currently only be evalue or num_threads.'''
 
 	sep = os.sep
 	cmds = {'p':{'p':'blastp','n':'tblastn'},'n':{'n':'blastn','p':'blastx'}}
@@ -86,100 +81,135 @@ Optional named arguments can currently only be evalue.'''
 		
 class Result(object):
 	'''Class BLASTResult
-A class which take the raw output from BLAST and generates dictionaries from
-the data from BLAST. This data includes the alignment, percetn identity, gaps,
-e-value, score, length of subject, length of query, and start and stop positions
-for both sequences.
+A class which take the raw output from BLAST and generates dictionaries from the data from BLAST. This data includes the alignment, percetn identity, gaps, e-value, score, length of subject, length of query, and start and stop positions for both sequences.
 
-This class should be used in a for loop like so:
-for res in BLASTResult(file_or_data): pass
+This class should be used in a for loop like so: 
+    for res in Result(file_or_data): pass
 
-The class instance has a single other property, headers, which are the lines in
-BLAST results before the BLAST hits (e.g., citation info, etc.).'''
+The class instance has a single other property, headers, which are the lines in BLAST results before the BLAST hits (e.g., citation info, etc.).'''
 
 	def __init__(self,file):
 		self.file = file
 		self.headers = []
 		
 	def __iter__(self):
-		name, qname, counts, newseq = '', '', 0, False
-		sequence, naming = [], False
-		try: handle = open(self.file,'r')
-		except TypeError: handle = iter(self.file)
-		while 1:
-			try: line = (lambda x: x[:-1] if x and x[-1] == '\n' else x)(handle.next())
-			except StopIteration:
-				if name:
-					obj = _parse(sequence,name,qname)
-					if obj: yield obj
-				raise StopIteration
-			if not line:
-				counts += 1
-				if counts == 2: newseq = True
-				continue
-			else: counts = 0
-			if line[:6] == 'Query=':
-				qname = line[6:]
-				sequence = []
-				newseq = False
-				name = ''
-				naming = True
-			elif naming:
-				if line[:7] == 'Length=':
-					naming = False
-					qname = qname.strip().split()[0]
-					sequence.append(line)
-				else:
-					qname += line[:-1]
-			elif line[0] == '>':
-				newseq = False
-				if name:
-					obj = _parse(sequence,name,qname)
-					if obj: yield obj
-				else:
-					self.headers = sequence[:]
-				name = line[1:].split()[0]
-				sequence = []
-			elif newseq:
-				newseq = False
-				if name:
-					obj = _parse(sequence,name,qname)
-					if obj: yield obj
-				sequence = [line]
-			else: sequence.append(line)
-			
-	def __getattribute__(self,name):
-		if name == 'headers':
-			if not object.__getattribute__(self,'headers'):
-				for a in self: pass
-		return object.__getattribute__(self,name)
-	
-def _parse(sequence,name,qname):
-	'''parse(data, subjectName, queryName)
-Parses a single BLAST result and returns a dictionary of the information.'''
-
-	obj = {'query':{'name':qname,'start':None,'end':None,'sequence':''},'subject':{'name':name,'start':None,'end':None,'sequence':''}}
-	subheaders = True
-	for line in sequence:
-		if line[:5] == 'Query': curr = 'query'
-		elif line[:5] == 'Sbjct': curr = 'subject'
-		elif subheaders:
-			for name,value in ((lambda x,y='': (x.split('(')[0].strip().lower(),y.strip()))(*i.split('=')) for i in line.split(',') if line if len(i.split('=')) == 2):
-				obj[name] = value
-			continue
-		else: continue # garbage: empty or alignment lines
-		subheaders = False
-		bits = line.split()
-		obj[curr]['start'] = obj[curr]['start'] or bits[1] # it's a string for now ('0' is not falsy)
-		obj[curr]['end']	 = bits[3]
-		obj[curr]['sequence'] += ''.join(bits[2].split('-'))
-	for i in ('query','subject'):
-		for j in ('start','end'):
-			if obj[i][j]: obj[i][j] = int(obj[i][j])
-			else: return None
-		obj[i]['length'] = abs(obj[i]['end']-obj[i]['start'])+1
-	return obj
+		try: ipt = open(self.file, 'r')
+		except: ipt = self.file
+		mode = 0
+		headers = []
+		curr = None
+		length = 0
 		
+		def sh(sn, qn, l):
+			return {
+				'subject': {
+					'name':  sn,
+					'start': None,
+					'end':   None,
+					'sequence': ''
+				},
+				'query': {
+					'name':  qn.split()[0],
+					'start': None,
+					'end':   None,
+					'sequence': ''
+				},
+				'length':  l
+			}
+	
+		def ra(sh):
+			for res in ('subject', 'query'):
+				sh[res]['start']  = int(sh[res]['start'])
+				sh[res]['end']    = int(sh[res]['end'])
+				sh[res]['length'] = abs(sh[res]['end'] - \
+				                    sh[res]['start'] + 1)
+			return sh		
+
+		for line in ipt:
+			line = line.strip()
+			if not line:
+				if mode == 4:
+					mode = 5
+				continue
+	
+			if mode == 0:
+				if line[:6] == 'Query=':
+					mode  = 1
+					qname = line[6:].strip()
+					self.headers = headers
+				else:
+					headers.append(line)
+		
+			elif mode == 1:
+				if line[0] == '>':	
+					mode = 3
+					subheaders = sh(line[1:], qname, length)
+				elif line[:6] == 'Length' or \
+						(line[0] == '(' and line.endswith('letters)')):
+					if line[:7] == 'Length=':
+						length = int(''.join(line[7:].strip().split(',')))
+					else:
+						length = int(''.join(line[1:-8].strip().split(',')))
+					mode  = 2
+				elif line[:6] == 'Query=':
+					qname = line[6:].strip()
+				else:
+					qname += line
+		
+			elif mode == 2:
+				if line[0] == '>':
+					mode = 3
+					subheaders = sh(line[1:], qname, length)
+				elif line[:6] == 'Query=':
+					qname = line[6:].strip()
+					mode = 1
+	
+			elif mode == 3:
+				if line[:5] == 'Score':
+					subheaders['subject']['name'] = subheaders['subject']['name'].split()[0]
+					for pairs in (a.strip() for a in line.split(',')):
+						l, r = tuple(a.strip() for a in pairs.split('=')[:2])
+						subheaders[l.lower()] = r
+					mode = 4
+				else:
+					subheaders['subject']['name'] += line
+		
+			elif mode == 4:
+				for pairs in (a.strip() for a in line.split(',')):
+					l, r = tuple(a.strip() for a in pairs.split('=')[:2])
+					subheaders[l.lower()] = r
+		
+			elif mode == 5:
+				if   line[:6] == 'Query=':
+					mode  = 1
+					qname = line[6:].strip().split()[0]
+					yield ra(subheaders)
+					continue
+				elif line[0] == '>':
+					yield ra(subheaders)
+					subheaders = sh(line[1:], qname, length)
+					mode = 3
+					continue
+				elif line[:5] == 'Score':
+					yield ra(subheaders)
+					subheaders = sh(subheaders['subject']['name'], qname, length)
+					for pairs in (a.strip() for a in line.split(',')):
+						l, r = tuple(a.strip() for a in pairs.split('=')[:2])
+						subheaders[l.lower()] = r
+					mode = 4
+					continue
+				elif line[:5] == 'Sbjct': curr = 'subject'
+				elif line[:5] == 'Query': curr = 'query'
+				else: continue
+		
+				_, start, seq, end = line.split()
+				subheaders[curr]['start']     = subheaders[curr]['start'] or start
+				subheaders[curr]['end']       = end
+				subheaders[curr]['sequence'] += ''.join(seq.split('-')).upper()
+	
+		yield ra(subheaders)
+		raise StopIteration
+
 if __name__ == "__main__":
 	import sys
 	for result in BLAST(sys.argv[1],sys.argv[2]):
