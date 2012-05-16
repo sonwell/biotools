@@ -3,7 +3,7 @@ import biotools.sequence as sequ
 import subprocess
 import os, sys
 
-def run(db,sfile,**kwargs):
+def run(db, sfile, mega_blast=False, **kwargs):
 	'''BLAST(database, query, **params)
 This function takes a database and a query and runs the appropriate type of BLAST on them. The database can be an existing BLAST database or a fasta/fastq file. If it is a sequence file, this function will look in the places where BLAST would look for an existing database created from that file and use that instead. If there is no such database, this function will make one for you and then use the newly created database with BLAST. 
 
@@ -75,8 +75,14 @@ Optional named arguments can currently only be evalue or num_threads.'''
 		else: raise IOError, "Database not found: " + db
 	allowed = set(["evalue", "gapopen", "gapextend", "num_threads"]) & set( kwargs.keys() )
 	cmd = cmds[qtype][dbtype]
+	pn = ["-db", "-query"]
+	if mega_blast:
+		cmd = "megablast"
+		pn = ["-d", "-i"]
+		allowed = ["e", "a"]
+
 	if sys.platform in ('win32', 'cygwin'): cmd += '.exe'
-	return Result(subprocess.check_output([cmds[qtype][dbtype],"-db",db,"-query",sfile] + \
+	return Result(subprocess.check_output([cmd,pn[0],db,pn[1],sfile] + \
 				 [arg for pair in [["-"+k,str(kwargs[k])] for k in allowed] for arg in pair]).split('\n'))
 		
 class Result(object):
