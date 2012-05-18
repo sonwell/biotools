@@ -10,37 +10,64 @@ def smoothed(unsmoothed, factor):
 	wm = np.array([x/sum(x) for x in c])
 	return np.dot(unsmoothed, wm.transpose())
 
-def plot(snpdata, directory, bottom=True, side=True, legend=True, save=True, \
-		filename='untitled.pdf', upperbound = 0.05, \
+def plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, \
+		filename='untitled.pdf', upperbound=0.05, factor=21, \
 		fig=plt.figure(None, facecolor='w', edgecolor='w'), **kwargs):
 
 	sep = os.sep
+	if not directory.endswith(sep):
+		directory += sep
+
 	try: os.mkdir(directory)
 	except: pass
 
-	lowerbound = -upperbound/6
+
+	# plotting data
+	ntvar  = plotdata['nt']['var']
+	aavar  = plotdata['aa']['var']
+
+	# gene models
+	starts = plotdata['aa']['starts']
+	ends   = plotdata['aa']['ends']
+	counts = plotdata['aa']['count']
 
 	# smooth the data
-	snt = smoothed(snpdata['nt']['var'], 21)
-	lnt =      len(snpdata['nt']['var'])
-	saa = smoothed(snpdata['aa']['var'], 21)
-	laa =      len(snpdata['aa']['var'])
+	snt = smoothed(ntvar, factor)
+	lnt =      len(ntvar)
+	saa = smoothed(aavar, factor)
+	laa =      len(aavar)
 
-	# generate x-ranges so that amino acids
-	# and nucleotides align 
-	xnt = np.arange(lnt)*(0.0+laa)/lnt+1
-	xaa = np.arange(laa)              +1
+	# bounding rectangle
+	bound = [0, laa, -upperbound/6, upperbound]
 
+	# x-values to align nucleotide & amino acids
+	xnt = np.arange(lnt)/3+1
+	xaa = np.arange(laa)  +1
+
+	ax  = axes(bottom, side, bound, fig, **kwargs)
+	ntl = draw(xnt, snt, ax, '#0000ff', **kwargs)
+	aal = draw(xaa, saa, ax, '#00ff00', **kwargs)
+	models(starts, ends, counts, bound, ax, **kwargs)
+	report(ntvar, aavar, lnt, laa)
+
+	if legend: fig.legend((ntl, aal), ('Nucleotide', 'Amino acid'), 'upper right')
+	if save: fig.savefig(directory+filename)
+
+def axes(bottom, side, bound, fig, **kwargs):
 	# create the proper sized frame, depending on
 	# how we draw the plot
 	x = 0.09 if side   else 0.02
 	y = 0.09 if bottom else 0.04
 
+	xs = [bound[0], bound[1]*1.06]
+	# construct the axes
 	ax = fig.add_axes([x,y,0.98-x,0.98-y], \
-		xlim=[0, laa*1.06], ylim=[lowerbound, upperbound])
+		xlim=xs, ylim=bound[2:])
 	ax.minorticks_on()
 	ax.tick_params(axis='x', which='minor', length=3)
 
+	# hide the unwanted axis lines (typically the top & right)
+	# label the wanted axes and draw them
 	for loc, spine in ax.spines.iteritems():
 		if loc in ['right', 'top']:
 			spine.set_color('none')
@@ -58,28 +85,26 @@ def plot(snpdata, directory, bottom=True, side=True, legend=True, save=True, \
 				spine.set_color('none')
 				ax.tick_params('y', which='both', color='none', labelcolor='none')
 
-	ax.hlines(ax.get_yticks(), 0, laa*1.06, color='0.75', linestyle='dashed')
-	ax.hlines(0, 0, laa*1.06, color='k', linestyle='solid')
+	ax.hlines(ax.get_yticks(), xs[0], xs[1], color='0.75', linestyle='dashed')
+	ax.hlines(0,               xs[0], xs[1], color='k',    linestyle='solid')
+	return ax
 
-	nt_lines = ax.plot(xnt, snt, color='#0000ff', linestyle='solid')
-	aa_lines = ax.plot(xaa, saa, color='#00ff00', linestyle='solid')
+def draw(x, y, ax, color, **kwargs):
+	return ax.plot(x, y, color=color, linestyle='solid')
 
-	starts = snpdata['aa']['starts']
-	ends   = snpdata['aa']['ends']
-	counts = snpdata['aa']['count']
-	scale  = laa/max(ends)
-	ys = (np.arange(len(starts))+1)*lowerbound/3
+def models(starts, ends, counts, bound, ax, **kwargs):
+	lb, l = bound[2], len(starts)
+	scale = bound[1]/max(ends)
+	ys, i = (np.arange(l+1)*lb/3, 0
 
+	# draw the gene models
 	ax.hlines(ys, starts, ends, colors='k', lw=4, linestyle='solid')
-	for i, c in zip(xrange(len(counts)), counts):
-		ax.text(laa + 10, lowerbound/3*(i+1.25), c)
-	if legend:
-		fig.legend((nt_lines, aa_lines), ('Nucleotide', 'Amino acid'), 'upper right')
+	for c in counts:
+		ax.text(bound[1] + 10, lb/3*(i+1.25), c)
+		i += 1
 
-	if save:
-		fig.savefig(directory+filename)
-
+def report(ntvar, aavar, lnt, laa)
 	print '=============', filename, '============='
 	print 'Average variance: '
-	print '\t', sum(snpdata['nt']['var'])/lnt, 'per base pair'
-	print '\t', sum(snpdata['aa']['var'])/laa, 'per amino acid'
+	print '\t', sum(ntvar)/lnt, 'per base pair'
+	print '\t', sum(aavar)/laa, 'per amino acid'

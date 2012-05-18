@@ -193,6 +193,14 @@ Globals:
 
 `plot(snpdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', fig=matplotlib.pyplot.figure(None, facecolor='w', edgecolor='w'), upperbound=0.05, **kwargs)`\: uses matplotlib to plot the sequence variance (`snpdata`) into a pdf in `directory` with under the name `filename`. This code can be used to generate multiple subfigures in the same figure using the booleans `bottom`, `side`, and `lengend` to draw or hide the x-axis, y-axis, and legend, respectively.
 
+`axes(bottom, side, bound, fig, **kwargs)`\: set up the axes for plotting; will hide the x-axis label if `bottom` is `False`, the y-axis if `side` is `False` on with `bound = [min x, max x, min y, max y]` figure `fig`.
+
+`draw(x, y, color, ax, **kwargs)`\: draw data `x` vs. `y` with color `color` on axes `ax`.
+
+`models(starts, ends, counts, bound, ax, **kwargs)`\: draws gene models over ranges between the values in `starts` and the corresponding values in `ends` and writes the number of genes with that model from `counts` on the axes `ax`.
+
+`report(ntvar, aavar, lnt, laa)`\: prints out the of average nucleotide variance (`ntvar`) per nucleotide (`lnt`) and the average amino acid variance (`aavar`) per nucleotide (`laa`).
+
 `biotools.analysis.predict`
 ---------------------------
 
