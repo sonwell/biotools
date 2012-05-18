@@ -95,7 +95,7 @@ def draw(x, y, ax, color, **kwargs):
 def models(starts, ends, counts, bound, ax, **kwargs):
 	lb, l = bound[2], len(starts)
 	scale = bound[1]/max(ends)
-	ys, i = (np.arange(l+1)*lb/3, 0
+	ys, i = np.arange(l+1)*lb/3, 0
 
 	# draw the gene models
 	ax.hlines(ys, starts, ends, colors='k', lw=4, linestyle='solid')
@@ -103,7 +103,7 @@ def models(starts, ends, counts, bound, ax, **kwargs):
 		ax.text(bound[1] + 10, lb/3*(i+1.25), c)
 		i += 1
 
-def report(ntvar, aavar, lnt, laa)
+def report(ntvar, aavar, lnt, laa):
 	print '=============', filename, '============='
 	print 'Average variance: '
 	print '\t', sum(ntvar)/lnt, 'per base pair'
