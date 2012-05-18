@@ -191,7 +191,7 @@ Globals:
 `biotools.analysis.plot`
 ------------------------
 
-`plot(snpdata, directory, bottom=True, side=True, legend=True, filename='untitled.pdf', **kwargs)`\: uses matplotlib to plot the sequence variance (`snpdata`) into a pdf in `directory` with under the name `filename`. This code can be used to generate multiple subfigures in the same figure using the booleans `bottom`, `side`, and `lengend` to draw or hide the x-axis, y-axis, and legend, respectively.
+`plot(snpdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', fig=matplotlib.pyplot.figure(None, facecolor='w', edgecolor='w'), upperbound=0.05, **kwargs)`\: uses matplotlib to plot the sequence variance (`snpdata`) into a pdf in `directory` with under the name `filename`. This code can be used to generate multiple subfigures in the same figure using the booleans `bottom`, `side`, and `lengend` to draw or hide the x-axis, y-axis, and legend, respectively.
 
 `biotools.analysis.predict`
 ---------------------------
