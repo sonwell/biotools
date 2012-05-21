@@ -1,3 +1,7 @@
 *.pyc
 .DS_Store
 .gitignore
+MANIFEST
+dist/
+test/
+biotools
