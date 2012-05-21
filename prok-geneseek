@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+# 1. predict
+# 2. cluster
+# 3. rename
+# 4. snps
+
+import biotools.analysis.run      as pr
+import biotools.analysis.cluster  as cw
+import biotools.analysis.renamer  as mv
+import biotools.analysis.variance	as cs
+import biotools.analysis.options  as op
+import sys, os
+
+if __name__ == "__main__":
+	op.parse(sys.argv[1:])
+	try: database, strains = pr.run()
+	except RuntimeError: exit(0)
+
+	direc = op.DIRECTORY
+	sep = os.sep
+	print "Homologous sequences written to " + direc + 'sequences' + sep
+	fmt = '%%ssequences%snt%s%%s.fastc' % ((sep,)*2)
+	cw.run(direc+'clusters'+sep, [fmt % (direc,s) for s in strains])
+	print "Clustalw files written to " + direc + "clusters" + sep
+	names = mv.rename(direc + 'clusters' + sep, database)
+
+	plotter = op.PLOTTER
+	copied = False
+	plotting = False
+	if plotter.lower() != 'none':
+		try:
+			cv = __import__(plotter, globals(), locals(), ['plot'], -1)
+			plotting = True
+		except ImportError:
+			try:
+				if not plotter.endswith('.py'):
+					plotter += '.py'
+				open(plotter, 'r')
+			except: pass
+			else:
+				p = plotter.rfind(sep)
+				if p > -1:
+					sys.path.append(plotter[:p])
+				plotter = plotter[p+len(sep):]
+
+				try:
+					cv = __import__(plotter, globals(), locals(), ['plot'], -1)
+					plotting = True
+				except ImportError: pass
+	
+	for s in names:
+		(plotdata, metadata) = cs.var(s, "clusters%s%%(type)s%s%%(strain)s.clustalw"%(sep,sep))
+		if plotting:
+			cv.plot(plotdata, direc+'plots'+sep, filename = metadata['filename'])
+		elif plotter.lower() != 'none':
+			print "Couldn't access%s. Instead, dumping data files into %sdata%s." % (op.PLOTTER, direc, sep)
+		try: os.mkdir(direc+'data' + sep)
+		except: pass
+		fh = open(direc + 'data' + sep + metadata['strain'] + '.py', 'w')
+		fh.write('plotdata = ' + repr(plotdata) + '\n')
+		fh.write('metadata = ' + repr(plotdata) + '\n')
+	print "Done"
+	
