@@ -261,7 +261,7 @@ A class that wraps IOBase and restricts the ability to write.'''
 	def read(self, n=None):
 		'''read(n=None)
 If n is provided, the next (up to) n entries are parsed and returned. Otherwise, all remaining entries are parsed and returned.'''
-		if count is None: return [s for s in self]
+		if n is None: return [s for s in self]
 		return [s for s, i in zip(iter(self), xrange(int(n)))]
 
 	def __iter__(self):
