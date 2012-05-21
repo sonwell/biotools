@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import biotools.sequence as sequ
+import biotools.IO as io
 import subprocess
 import os, sys
 
@@ -12,7 +12,7 @@ Optional named arguments can currently only be evalue or num_threads.'''
 	sep = os.sep
 	cmds = {'p':{'p':'blastp','n':'tblastn'},'n':{'n':'blastn','p':'blastx'}}
 
-	seq = sequ.open(sfile, 'r').next()
+	seq = io.open(sfile, 'r').next()
 	qtype = 'p' if set(seq.seq)-set('ATCGNYR') else 'n'
 
 	rcloc = ''
@@ -44,7 +44,7 @@ Optional named arguments can currently only be evalue or num_threads.'''
 	if not dbtype:
 		pos = db.rfind(".")
 		if pos >= 0 and db[pos+1:] in ["txt","fasta","fa","fas"]:
-			for seq in sequ.open(db, 'r'):
+			for seq in io.open(db, 'r'):
 				if set(seq.seq) - set('ATCGNRY'): dbtype = 'p'
 				else: dbtype = 'n'
 				break
