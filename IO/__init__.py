@@ -3,6 +3,17 @@ from biotools.sequence import Sequence
 from biotools.annotation import Annotation
 import __builtin__
 
+def chop(seq,length = 70):
+  '''chop( sequence, length = 70 )
+Yields a chunk of a sequence of no more than length characters,
+it is meant to be used to print fasta files.'''
+
+  while seq:
+    try: piece,seq = seq[:length],seq[length:]
+    except: piece,seq = seq,''
+    yield piece
+  raise StopIteration
+
 def _io_methods():
 	def clean_alignment(x):
 		i = 0
@@ -35,7 +46,8 @@ def _io_methods():
 					return {'type': 'gff', 
 					        'version': float(bits[1])}
 				return False
-		return False
+		return {'type': 'gff',
+		        'version': 3}
 
 	nil = lambda x: None
 
@@ -125,7 +137,7 @@ def _io_methods():
 					return {'type': 'fasta'}
 				return False
 		fh.close()
-		return False
+		return {'type': 'fasta'}
 
 	def probe_fastq(fh):
 		for line in fh:
@@ -137,10 +149,9 @@ def _io_methods():
 					qual = [ord(c) for c in fh.next().strip()]
 					phred = 32 if min(qual)<ord('A') else 64
 					qual = [q-phred for q in qual]
-					return {'type': 'fastq', 'phred': phred, 'qual': qual}
+					return {'type': 'fastq', 'phred': phred}
 				return False
-		fh.close()
-		return False
+		return {'type': 'fastq', 'phread': 64}
 
 	def probe_fastc(fh):
 		return False
@@ -152,7 +163,7 @@ def _io_methods():
 				if st.split()[0].lower() == 'CLUSTAL':
 					return {'type': 'clustalw'}
 				return False
-		return False
+		return {'type': 'clustalw'}
 
 	nil = lambda *x: None
 	def pop(fh):
@@ -211,7 +222,8 @@ Recoginized file extensions include fa, fsa, fas, fasta, fastc, fastq, clustalw,
 				except ValueError:
 					pass
 		try:
-			for method in methods:
+			print name
+			for method in IOBase.methods:
 				try:
 					self.format(method)
 					return

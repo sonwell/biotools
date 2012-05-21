@@ -23,7 +23,7 @@ Translate a nucleotide using the standard genetic code. The sequence parameter c
 
   try:
     value = ''.join(_gencode.get(x.seq[i:i+3].upper(),'X') for i in xrange(0,len(x)/3*3,3))
-    return x.__class__("translate(%s)" % x.name,value,original=x,type='prot',defline=x.defline)
+    return x.__class__("translate(%s)" % x.name,value,original=x.original,type='prot',defline=x.defline)
   except AttributeError:
     value = ''.join(_gencode.get(x[i:i+3].upper(),'X') for i in xrange(0,len(x)/3*3,3))
     return x.__class__(value)

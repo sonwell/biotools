@@ -1,16 +1,5 @@
 from biotools.annotation import Annotation
 
-def chop(seq,length = 70):
-  '''chop( sequence, length = 70 )
-Yields a chunk of a sequence of no more than length characters,
-it is meant to be used to print fasta files.'''
-
-  while seq:
-    try: piece,seq = seq[:length],seq[length:]
-    except: piece,seq = seq,''
-    yield piece
-  raise StopIteration
-
 class Sequence(object):
   '''class Sequence
 A wrapper class for sequences.'''
