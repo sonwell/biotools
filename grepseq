@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+
+from optparse import OptionParser
+import biotools.IO as io
+import re
+
+def search(regex, filename, options):
+	pfn = options.print_filename
+	snm = options.search_name
+	ssq = options.search_seq
+	inv = options.invert_results
+	cnt = options.count
+	cmx = options.max_count
+
+	if pfn and not cnt:
+		print '\n=======>', filename, '<=======\n'
+
+	for seq in io.open(filename, 'r'):
+		if not inv and ((ssq and regex.search(seq.seq)) or \
+ 			 (snm and regex.search(seq.name + ' ' + seq.defline))):
+			options.curr_count += 1
+			if not cnt: print seq
+		elif inv:
+			options.curr_count += 1
+			if not cnt: print seq
+		if cmx and options.curr_count > cmx:
+			break
+
+	if cnt:
+		print options.curr_count
+
+if __name__ == '__main__':
+	optp = OptionParser(usage="%prog [options] <pattern> <files ...>")
+	optp.add_option('-c', '--count',
+		action='store_true', dest='count', default=False,
+		help='Suppress normal output; instead print a count of matching lines for each input file. With the -v, --invert-match option (see below), count non-matching lines.')
+	optp.add_option('-H', '--with-filename',
+		action='store_true', dest='print_filename', default=False,
+		help='Print the filename for each match.')
+	optp.add_option('-i', '--ignore-case',
+		action='store_true', dest='ignore_case', default=False,
+		help='Ignore case distinctions in both the pattern and input files.')
+	optp.add_option('-m', '--max-count', metavar='NUM',
+		action='store', dest='max_count', default=None, type='int',
+		help='Stop reading a file after NUM matching lines. When the -c or --count option is also used, grepseq does not output a count greater than NUM. When the -v or --invert-match option is also used, grep stops after outputting NUM non-matching lines.')
+	optp.add_option('-N', '--names-only',
+		action='store_false', dest='search_seq', default=True,
+		help='Search only sequence names. Cannot be used with -S.')
+	optp.add_option('-S', '--sequences-only',
+		action='store_false', dest='search_name', default=True,
+		help='Search only sequences. Cannot be used with -N.')
+	optp.add_option('-v','--invert-match',
+		action='store_true', dest='invert_results', default=False,
+		help='Invert the sense of matching, to select non-matching lines.')
+
+	opts, args = optp.parse_args()
+	if len(args) < 2:
+		optp.print_help()
+		exit(1)
+
+	if opts.max_count != None and opts.max_count < 1:
+		exit(0)
+
+	flags = 0
+	if opts.ignore_case:
+		flags |= re.I
+
+	try:    pattern = re.compile(args[0], flags)
+	except: exit(1)
+	files = args[1:]
+
+	opts.curr_count = 0
+
+	if len(files) > 1 or opts.print_filename:
+		opts.print_filename = True
+
+	for f in files:
+		search(pattern, f, opts)
