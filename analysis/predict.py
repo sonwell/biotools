@@ -4,8 +4,8 @@ import biotools.sequence         as sequ
 import biotools.annotation       as anno
 import biotools.BLAST            as BLAST
 import biotools.analysis.options as options
-from biotools.align import *
-from biotools.translate import *
+from biotools.align      import *
+from biotools.translate  import *
 from biotools.complement import *
 
 import Queue as queue
@@ -98,7 +98,7 @@ BLASTs database against sequences, and for those results that pass the length an
 
 	subj = dict((s.name, s) for s in io.open(db, 'r'))
 
-	try: orfs = {s.name:[orf for orf in ORFGenerator(s)] for s in io.open(sequences, 'r')}
+	try: orfs = dict((s.name, [orf for orf in ORFGenerator(s)]) for s in io.open(sequences, 'r'))
 	except IOError:
 		print "%d: No file \"" + sequences + ",\" skipping."
 		return	
