@@ -68,6 +68,8 @@ The class instance has a single other property, `headers`, which are the lines i
 
 Recognized file extension include fa, fsa, fas, fasta, fastc, fastq, clusalw, clustalw, aln, gff, gff3.
 
+`chop(seq, length=70)`\: yields a chunk of a sequence of no more than `length` characters, it is meant to be used to print fasta files.
+
 `IOBase` has a class property, `methods`, which is an `IOManager` (see `biotools.iomanager`).
 
 An `IOBase` instance has the following attributes:
@@ -93,8 +95,8 @@ and others that are specific to the particular file type.
 
 `open(filename, mode='r')`\: open a file for parsing or writing; returns either a Reader or Writer, depending on the open mode.
 
-`biotools.iomanager`
---------------------
+`biotools.IO.manager`
+---------------------
 
 `IOManager(self, methods=None)`\: a class used by the `IOBase` class to manage the various input and output methods for the different file types. Additional file types can be added to the manager by using `manager[format] = methods`.
 
@@ -109,8 +111,6 @@ This class behaves similarly to a dictionary, except that the `get` method will 
 
 `biotools.sequence`
 -------------------
-
-`chop(seq, length=70)`\: yields a chunk of a sequence of no more than `length` characters, it is meant to be used to print fasta files.
 
 `Sequence(self, name, seq, **kwargs)`\: instantiates a `Sequence` object with sequence `seq`. 
 
