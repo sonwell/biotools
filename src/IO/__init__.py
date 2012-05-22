@@ -1,18 +1,7 @@
 from biotools.IO.manager import IOManager
-from biotools.sequence import Sequence
+from biotools.sequence import Sequence, chop
 from biotools.annotation import Annotation
 import __builtin__
-
-def chop(seq,length = 70):
-  '''chop( sequence, length = 70 )
-Yields a chunk of a sequence of no more than length characters,
-it is meant to be used to print fasta files.'''
-
-  while seq:
-    try: piece,seq = seq[:length],seq[length:]
-    except: piece,seq = seq,''
-    yield piece
-  raise StopIteration
 
 def _io_methods():
 	def clean_alignment(x):
