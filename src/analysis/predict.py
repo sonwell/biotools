@@ -137,8 +137,8 @@ BLASTs database against sequences, and for those results that pass the length an
 
 	sa = sequ.annotation
 	for id in seqs:
-		fh.write(s for s in seqs[id])
-		ah.write(translate(s) for s in seqs[id])
+		[fh.write(s) or None for s in seqs[id]]
+		[ah.write(translate(s)) or None for s in seqs[id]]
 		gh.write(sa(seqs[id].copy().pop(),pref,'gene',homologs=','.join(s.name for s in seqs[id])))
 	fh.close()
 	ah.close()
