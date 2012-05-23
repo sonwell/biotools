@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name="biotools",
-      version='1.1.5',
+      version='1.1.11',
       description="A bunch of bioinformatics utilities.",
       long_description="""Accompanies Bart, Rebecca, *et al.* High-throughput genomic sequencing of Cassava Bacterial Blight strains identifies conserved effectors to target for durable resistance. *PNAS Plus*.
 
@@ -15,7 +15,7 @@ Currently depends on `clustalw <ftp://ftp.ebi.ac.uk/pub/software/clustalw2/2.1/>
       url="https://github.com/sonwell/biotools",
       requires=['numpy','matplotlib'],
       packages=['biotools', 'biotools.analysis', 'biotools.IO'],
-      package_dir={'biotools': 'src'},
+      package_dir={'biotools': 'src', 'biotools.analysis': 'src/analysis', 'biotools.IO': 'src/IO'},
       scripts=['prok-geneseek'],
       keywords='gene prediction, prokaryotes, effectors',
       classifiers=[
