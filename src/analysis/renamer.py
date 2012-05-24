@@ -12,15 +12,15 @@ This isn't really for bioinformatics, this is more for the pipeline, to rename t
 
 	names = []
 	files = [f for f in os.listdir(nt_dir) if f[-6:] == ".fasta"]
-	seqdb = dict((s.name.split("|")[1],s) for s in io.open(db, 'r'))
+	seqdb = dict((s.name,s) for s in io.open(db, 'r'))
 	for f in files:
 		seq = io.open(nt_dir+f, 'r').next()
 		ids = seq.defline.split(', ')
-		print "File\033[33;1m", f, "\033[0mis described by the following effectors:"
+		print "File\033[33;1m", f, "\033[0mis described by the following sequences:"
 		try:
 			for id in ids:
 				seqdb[id]
-				print "*", seqdb[id].defline.split('[')[0]
+				print "*", seqdb[id].name + ':', seqdb[id].defline.split('[')[0]
 		except: 
 			print "* (none)"
 			continue
