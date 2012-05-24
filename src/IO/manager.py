@@ -14,6 +14,11 @@ This class behaves similarly to a dicitonary, except that the get method will de
 	def __init__(self, methods=None):
 		'''IOManager(methods=None)
 Instantiates an IOManager with methods, where the keys of methods are the formats and the values are dictionaries with rhook, whook, read, write, and probe callables.'''
+		if '__order__' in methods:
+			self.order = methods['__order__']
+			del methods['__order__']
+		else:
+			self.order = methods.keys()
 		self.methods   = methods or {}
 		self.protected = set(self.methods.keys())
 
@@ -38,4 +43,4 @@ Instantiates an IOManager with methods, where the keys of methods are the format
 		return value
 
 	def __iter__(self):
-		return iter(self.methods)
+		return (self.methods[k] for k in self.order)

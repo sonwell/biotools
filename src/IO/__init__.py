@@ -143,7 +143,7 @@ def _io_methods():
 		return {'type': 'fastq', 'phread': 64}
 
 	def probe_fastc(fh):
-		return False
+		return {'type': 'fastc'}
 
 	def probe_clustalw(fh):
 		for line in fh:
@@ -175,6 +175,7 @@ def _io_methods():
 		'gff': {'rhook': nil,       'read': read_gff,
 	          'whook': whook_gff, 'write': write_gff,
 	                              'probe': probe_gff}
+		'__order__': ['fasta','fastq','clustalw','gff']
 	}
 
 class IOBase(object):
@@ -211,7 +212,6 @@ Recoginized file extensions include fa, fsa, fas, fasta, fastc, fastq, clustalw,
 				except ValueError:
 					pass
 		try:
-			print name
 			for method in IOBase.methods:
 				try:
 					self.format(method)
