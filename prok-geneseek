@@ -10,34 +10,58 @@ import biotools.analysis.cluster  as cw
 import biotools.analysis.renamer  as mv
 import biotools.analysis.variance	as cs
 import biotools.analysis.options  as op
+import biotools.analysis.loaddata as ld
 import sys, os
 
 if __name__ == "__main__":
 	op.parse(sys.argv[1:])
-	try: database, strains = pr.run()
-	except RuntimeError: exit(0)
+	if len(op.args) < 2:
+		op.help()
+		exit(0)	
 
-	direc = op.DIRECTORY
-	sep = os.sep
-	print "Homologous sequences written to " + direc + 'sequences' + sep
-	fmt = '%%ssequences%snt%s%%s.fastc' % ((sep,)*2)
-	cw.run(direc+'clusters'+sep, [fmt % (direc,s) for s in strains])
-	print "Clustalw files written to " + direc + "clusters" + sep
-	names = mv.rename(direc + 'clusters' + sep, database)
+	direc    = op.DIRECTORY
+	plotter  = op.PLOTTER
+	database = op.args[0]
+	names    = op.args[1:]
+	sep      = os.sep
 
-	plotter = op.PLOTTER
-	copied = False
-	plotting = False
-	if plotter.lower() != 'none':
+	predict   = op.predicting
+	cluster   = op.clustering
+	rename    = op.renaming
+	plot      = op.plotting
+	report    = op.reporting
+	calculate = op.calculating
+
+	rename    = rename    and (cluster   or not predict)
+	calculate = calculate and (cluster   or not predict)
+	plot      = plot      and (calculate or not (predict or cluster))
+	report    = report    and  calculate
+
+	if not (predict or cluster or rename or calculate or plot or report):
+		print "I don't know what you want, I give up."
+		exit(0)
+
+	if predict:
+		names = pr.run(database, names)
+		print "Homologous sequences written to " + direc + 'sequences' + sep
+
+	if cluster:
+		names = cw.run(direc+'clusters'+sep, names)
+		print "Clustalw files written to " + direc + "clusters" + sep
+
+	if rename:
+		names = mv.rename(direc + 'clusters' + sep, database, names)
+
+	if plot and plotter.lower() != 'none':
 		try:
 			cv = __import__(plotter, globals(), locals(), ['plot'], -1)
-			plotting = True
 		except ImportError:
 			try:
 				if not plotter.endswith('.py'):
 					plotter += '.py'
 				open(plotter, 'r')
-			except: pass
+			except:
+				plot = False
 			else:
 				p = plotter.rfind(sep)
 				if p > -1:
@@ -46,19 +70,24 @@ if __name__ == "__main__":
 
 				try:
 					cv = __import__(plotter, globals(), locals(), ['plot'], -1)
-					plotting = True
-				except ImportError: pass
+				except ImportError:
+					plot = False
 	
 	for s in names:
-		(plotdata, metadata) = cs.var(s, "clusters%s%%(type)s%s%%(strain)s.clustalw"%(sep,sep))
-		if plotting:
+		if calculate:
+			(plotdata, metadata) = cs.var(s, "clusters%s%%(type)s%s%%(strain)s.clustalw"%(sep,sep))
+		elif plot:
+			parsed = ld.parse(open(s, 'r'))
+			plotdata = parsed['plotdata']
+			metadata = parsed['metadata']		
+		if plot:
 			cv.plot(plotdata, direc+'plots'+sep, filename = metadata['filename'])
-		elif plotter.lower() != 'none':
-			print "Couldn't access%s. Instead, dumping data files into %sdata%s." % (op.PLOTTER, direc, sep)
-		try: os.mkdir(direc+'data' + sep)
-		except: pass
-		fh = open(direc + 'data' + sep + metadata['strain'] + '.py', 'w')
-		fh.write('plotdata = ' + repr(plotdata) + '\n')
-		fh.write('metadata = ' + repr(plotdata) + '\n')
+		if report:
+			try: os.mkdir(direc+'data' + sep)
+			except: pass
+
+			fh = open(direc + 'data' + sep + metadata['strain'] + '.py', 'w')
+			fh.write('plotdata = ' + repr(plotdata) + '\n')
+			fh.write('metadata = ' + repr(plotdata) + '\n')
 	print "Done"
-	
+

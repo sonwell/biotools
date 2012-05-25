@@ -5,7 +5,7 @@ import biotools.analysis.options as options
 import threading, sys, os
 import Queue as queue
 
-def _run_genepredict(q, infile):
+def _run_genepredict(q, infile, names):
 	while 1:
 		try: strainf = q.get(False)
 		except: break
@@ -14,33 +14,29 @@ def _run_genepredict(q, infile):
 		if pos > 1 or (pos == 1 and strain[0] != '.'):
 			strain = strain[:pos]
 
-		try: genepredict.run(*[infile, strainf, strain])
+		options.debug("Predicting for %s." % strain)
+
+		try: genepredict.run(infile, strainf, strain, names)
 		except RuntimeError: pass
 		q.task_done()
 
-def run():
+def run(infile, strains):
 	'''run()
 Run several instances of genepredict.run at once.'''
-	args = options.args
-	if len(args) < 2:
-		options.help()
-		raise RuntimeError
-	else:
-		infile	= args[0]
-		strains = args[1:]
 
-		q = queue.Queue()
-		for strain in strains:
-			q.put(strain)
+	q = queue.Queue()
+	for strain in strains:
+		q.put(strain)
 
-		for i in range(options.NUM_PROCESSES-1):
-			curr = threading.Thread(target=_run_genepredict, args=(q, infile))
-			curr.start()
+	filenames = []
+	for i in range(options.NUM_PROCESSES-1):
+		curr = threading.Thread(target=_run_genepredict, args=(q, infile, filenames))
+		curr.start()
 
-		_run_genepredict(q, infile)
-		q.join()
+	_run_genepredict(q, infile, filenames)
+	q.join()
 
-	return (infile, [s.split(os.sep)[-1].split('.')[0] for s in strains])
+	return filenames
 
 if __name__ == "__main__":
 	import sys
