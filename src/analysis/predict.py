@@ -111,8 +111,9 @@ BLASTs database against sequences, and for those results that pass the length an
 		if float(res['expect']) > options.MAX_EVALUE:
 			continue
 
+		sbjl  = len(subj[res['subject']['name']])
 		score = float(res['identities'].split('(')[1][:-2]) / 100 * \
-			res['subject']['length'] / len(subj[res['subject']['name']])
+			abs(res['subject']['length']-sbjl) / sbjl)
 		if score > options.MIN_IDENTITY * options.LENGTH_ERR:
 			blastresults.append((score, res))
 	
@@ -128,7 +129,7 @@ BLASTs database against sequences, and for those results that pass the length an
 	seqs = {}
 	while not q_outputs.empty():
 		try:
-			seq = q_outputs.get()
+			seq = q_outputs.get(False)
 			if seq.seq not in seqs:
 				seqs[seq.seq] = set()
 			seqs[seq.seq].add(seq)
