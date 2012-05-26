@@ -16,25 +16,32 @@ def ORFGenerator(sequence):
 	'''ORFGenerator(sequences)
 Scans both strands of the give sequence and yields the longest subsequence that starts with a start codon and contains no stop codon other than the final codon.'''
 
-	slen = len(sequence)
-	ifor, irev = [0,0,0],[0,0,0]
+	comp   = complement(sequence[::-1])
+	seq    = sequence.seq
+	cseq   = comp.seq
+	slen   = len(sequence)
+	starts = [-1, 0, 1, -1, 0, 1]
+	stops  = [ 0, 1, 2,  0, 1, 2] # locations of stop codons in each frame
+
 	for i in xrange(slen-2):
-		if i >= ifor[i%3]:
-			if sequence.seq[i:i+3] in options.START_CODONS:
-				for j in xrange(i+3,slen-2,3):
-					if sequence.seq[j:j+3] in options.STOP_CODONS:
-						ifor[i%3] = j+3
-						if j-i >= options.MIN_ORFLEN:
-							yield sequence[i:j+3]
-						break
-		if i >= irev[i%3]:
-			if complement(sequence.seq[-i:-(i+3):-1]) in options.START_CODONS:
-				for j in xrange(i+3,slen-2,3):
-					if complement(sequence.seq[-j:-(j+3):-1]) in options.STOP_CODONS:
-						irev[i%3] = j+3
-						if j-i >= options.MIN_ORFLEN:
-							yield complement(sequence[-i:-(j+3):-1])
-						break
+		fcodon, rcodon = seq[i:i+3], cseq[i:i+3]
+		if fcodon in options.STOP_CODONS:
+			if starts[i%3+3] >= stops[i%3+3] and \
+			   i - starts[i%3+3] >= options.MIN_ORFLEN:
+				yield sequence[starts[i%3+3]:i+3]
+			stops[i%3+3] = i+3
+		elif fcodon in options.START_CODONS:
+			if starts[i%3+3] < stops[i%3+3]:
+				starts[i%3+3] = i
+		if rcodon in options.STOP_CODONS:
+			if starts[i%3+0] >= stops[i%3+0] and \
+			   i - starts[i%3+0] >= options.MIN_ORFLEN:
+				yield     comp[starts[i%3+0]:i+3]
+			stops[i%3+0] = i+3
+		elif rcodon in options.START_CODONS:
+			if starts[i%3+0] < stops[i%3+0]:
+				starts[i%3+0] = i
+
 	raise StopIteration
 	
 def _genepredict_target(qin,qout,orfs,subj):
@@ -113,8 +120,8 @@ BLASTs database against sequences, and for those results that pass the length an
 
 		sbjl  = len(subj[res['subject']['name']])
 		score = float(res['identities'].split('(')[1][:-2]) / 100 * \
-			abs(res['subject']['length']-sbjl) / sbjl)
-		if score > options.MIN_IDENTITY * options.LENGTH_ERR:
+			float(res['subject']['length'])/sbjl
+		if score > options.MIN_IDENTITY * (1.0-options.LENGTH_ERR):
 			blastresults.append((score, res))
 	
 	blastresults.sort()
@@ -153,3 +160,13 @@ BLASTs database against sequences, and for those results that pass the length an
 
 def run(subject, query, prefix, names):
 	GeneFromBLAST(subject, query, prefix, names)
+
+if __name__ == '__main__':
+	import sys
+	for f in sys.argv[1:]:
+		print f
+		for seq in io.open(f, 'r'):
+			#print ' ', len([None for orf in ORFGenerator(seq)])
+			print '  ' + seq.name + ':'
+			for orf in ORFGenerator(seq):
+				print '    ' + '\n    '.join(str(orf).split('\n'))

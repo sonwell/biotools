@@ -1,6 +1,6 @@
 from optparse  import OptionParser
 from threading import Lock
-import os
+import os, sys
 
 LENGTH_ERR    = 0.2
 MIN_IDENTITY  = 0.45
@@ -68,7 +68,7 @@ parser.add_option("--no-calculation", action="store_false", dest="calculating",
 def debug(msg):
 	if verbose:
 		lock.acquire(True)
-		print msg
+		sys.stderr.write(str(msg) + '\n')
 		lock.release()
 
 def parse(pargs):
