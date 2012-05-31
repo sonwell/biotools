@@ -119,6 +119,7 @@ These variables are:
 		                       for k in DNA) - \
 		             set(opts.stop)
 
+	opts.processes = min(opts.processes, len(largs))
 	if not (0 <= opts.fraction <= 1):
 		raise RuntimeError, "Allowable length error must be between 0 and 1, inclusive."
 

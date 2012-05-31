@@ -10,10 +10,19 @@ This function takes a database and a query and runs the appropriate type of BLAS
 Optional named arguments can currently only be evalue or num_threads.'''
 
 	sep = os.sep
-	cmds = {'p':{'p':'blastp','n':'tblastn'},'n':{'n':'blastn','p':'blastx'}}
+	cmds = {
+		'prot':{
+			'prot':'blastp',
+			'nucl':'tblastn'
+		},
+		'nucl':{
+			'nucl':'blastn',
+			'prot':'blastx'
+		}
+	}
 
 	seq = io.open(sfile, 'r').next()
-	qtype = 'p' if set(seq.seq)-set('ATCGNYR') else 'n'
+	qtype = seq.type
 
 	rcloc = ''
 	for loc in (".:~:"+ (os.getenv("NCBI") or "")).split(':'):
@@ -32,12 +41,12 @@ Optional named arguments can currently only be evalue or num_threads.'''
 		if loc and loc[-1] != sep: loc += sep
 		try:
 			open(loc + db+'.pin','r')
-			dbtype = 'p'
+			dbtype = 'prot'
 			break
 		except IOError:
 			try:
 				open(loc + db+'.nin','r')
-				dbtype = 'n'
+				dbtype = 'nucl'
 				break
 			except IOError: pass
 				
@@ -45,15 +54,19 @@ Optional named arguments can currently only be evalue or num_threads.'''
 		pos = db.rfind(".")
 		if pos >= 0 and db[pos+1:] in ["txt","fasta","fa","fas"]:
 			for seq in io.open(db, 'r'):
-				if set(seq.seq) - set('ATCGNRY'): dbtype = 'p'
-				else: dbtype = 'n'
+				dbtype = seq.type
 				break
 			if not dbtype: raise IOError, "Database not found: " + db
+
 			ndb = None
-			dbdir = sep.join(db.split(sep)[:-1]) or '.'
+			sp  = db.rfind(sep)
+			odb = db
+			if sp > -1: dbdir, db = db[:sp], db[sp+1:pos]
+			else:       dbdir = '.'
+
 			for file in os.listdir(dbdir):
 				dpos = file.rfind('.')
-				if dpos >= 0 and file[dpos+1:] == dbtype + 'in':
+				if dpos >= 0 and file[dpos+1:] == dbtype[0] + 'in':
 					fh = open(dbdir + sep + file,'r')
 					c = ord(fh.read(12)[-1])
 					fname = fh.read(c)
@@ -61,19 +74,22 @@ Optional named arguments can currently only be evalue or num_threads.'''
 						ndb = dbdir + sep + file[:dpos]
 						break
 			if not ndb:
-				ndb = '_'.join(db[:pos].split())
+				ndb = dbdir + sep + '_'.join(db.split())
 				try:
 					ignore = open('/dev/null','w')
 					mbdb	 = 'makeblastdb'
 				except:
 					ignore = open('nul', 'w')
 					mbdb	 = 'makeblastdb.exe'
-				dt = 'nucl' if dbtype == 'n' else 'prot'
-				subprocess.call([mbdb,"-in",'"%s"' % db,"-out",ndb,"-dbtype",dt],stdout=ignore)
+
+				subprocess.call([mbdb,"-in",'"%s"' % odb,
+				                 "-out", ndb,
+				                 "-dbtype",dbtype],
+				                 stdout=ignore)
 				db = ndb
 			else: db = ndb
 		else: raise IOError, "Database not found: " + db
-	allowed = set(["evalue", "gapopen", "gapextend", "num_threads"]) & set( kwargs.keys() )
+	allowed = set(["evalue", "gapopen", "gapextend", "num_threads"]) & set(kwargs.keys())
 	cmd = cmds[qtype][dbtype]
 	pn = ["-db", "-query"]
 	if mega_blast:
@@ -131,6 +147,11 @@ The class instance has a single other property, headers, which are the lines in 
 				                    sh[res]['start'] + 1)
 			return sh		
 
+		def sh_fmt(l):
+			for pairs in (a.strip() for a in line.split(',')):
+				l, r = tuple(a.strip() for a in pairs.split('=')[:2])
+				subheaders[l.lower().split('(')[0]] = r
+
 		for line in ipt:
 			line = line.strip()
 			if not line:
@@ -172,18 +193,15 @@ The class instance has a single other property, headers, which are the lines in 
 	
 			elif mode == 3:
 				if line[:5] == 'Score':
-					subheaders['subject']['name'] = subheaders['subject']['name'].split()[0]
-					for pairs in (a.strip() for a in line.split(',')):
-						l, r = tuple(a.strip() for a in pairs.split('=')[:2])
-						subheaders[l.lower()] = r
+					snm = subheaders['subject']['name'].split()[0]
+					subheaders['subject']['name'] = snm
+					sh_fmt(line)
 					mode = 4
 				else:
 					subheaders['subject']['name'] += line
 		
 			elif mode == 4:
-				for pairs in (a.strip() for a in line.split(',')):
-					l, r = tuple(a.strip() for a in pairs.split('=')[:2])
-					subheaders[l.lower()] = r
+				sh_fmt(line)
 		
 			elif mode == 5:
 				if   line[:6] == 'Query=':
@@ -199,9 +217,7 @@ The class instance has a single other property, headers, which are the lines in 
 				elif line[:5] == 'Score':
 					yield ra(subheaders)
 					subheaders = sh(subheaders['subject']['name'], qname, length)
-					for pairs in (a.strip() for a in line.split(',')):
-						l, r = tuple(a.strip() for a in pairs.split('=')[:2])
-						subheaders[l.lower()] = r
+					sh_fmt(line)
 					mode = 4
 					continue
 				elif line[:5] == 'Sbjct': curr = 'subject'
@@ -211,7 +227,7 @@ The class instance has a single other property, headers, which are the lines in 
 				_, start, seq, end = line.split()
 				subheaders[curr]['start']     = subheaders[curr]['start'] or start
 				subheaders[curr]['end']       = end
-				subheaders[curr]['sequence'] += ''.join(seq.split('-')).upper()
+				subheaders[curr]['sequence'] += seq.upper()
 	
 		yield ra(subheaders)
 		raise StopIteration

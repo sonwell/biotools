@@ -12,23 +12,23 @@ import Queue as queue
 import threading
 import random, sys, os
 
-def ORFGenerator(sequence):
-	'''ORFGenerator(sequences)
+def ORFGenerator(sequ):
+	'''ORFGenerator(sequ)
 Scans both strands of the give sequence and yields the longest subsequence that starts with a start codon and contains no stop codon other than the final codon.'''
 
-	comp   = complement(sequence[::-1])
-	seq    = sequence.seq
+	comp   = complement(sequ[::-1])
+	seq    = sequ.seq
 	cseq   = comp.seq
-	slen   = len(sequence)
-	starts = [-1, 0, 1, -1, 0, 1]
-	stops  = [ 0, 1, 2,  0, 1, 2] # locations of stop codons in each frame
+	slen   = len(sequ)
+	starts = [-1, 0, 1, -1, 0, 1]  # locations of start codons in each frame
+	stops  = [ 0, 1, 2,  0, 1, 2]  # locations of stop  codons in each frame
 
 	for i in xrange(slen-2):
 		fcodon, rcodon = seq[i:i+3], cseq[i:i+3]
 		if fcodon in options.STOP_CODONS:
 			if starts[i%3+3] >= stops[i%3+3] and \
 			   i - starts[i%3+3] >= options.MIN_ORFLEN:
-				yield sequence[starts[i%3+3]:i+3]
+				yield sequ[starts[i%3+3]:i+3]
 			stops[i%3+3] = i+3
 		elif fcodon in options.START_CODONS:
 			if starts[i%3+3] < stops[i%3+3]:
@@ -36,7 +36,7 @@ Scans both strands of the give sequence and yields the longest subsequence that 
 		if rcodon in options.STOP_CODONS:
 			if starts[i%3+0] >= stops[i%3+0] and \
 			   i - starts[i%3+0] >= options.MIN_ORFLEN:
-				yield     comp[starts[i%3+0]:i+3]
+				yield comp[starts[i%3+0]:i+3]
 			stops[i%3+0] = i+3
 		elif rcodon in options.START_CODONS:
 			if starts[i%3+0] < stops[i%3+0]:
@@ -48,8 +48,8 @@ def _genepredict_target(qin,qout,orfs,subj):
 	while not qin.empty():
 		try: res = qin.get(False)
 		except: break
-		qname,start,end = res['query']['name'],res['query']['start'],res['query']['end']
-		sname					 = res['subject']['name']
+		qname, sname = res['query']['name'],  res['subject']['name']
+		start, end   = res['query']['start'], res['query']['end']
 
 		if subj[sname].type == 'nucl': subject = translate(subj[sname])
 		else: subject = subj[sname]
@@ -66,29 +66,34 @@ def _genepredict_target(qin,qout,orfs,subj):
 			continue
 
 		alignments = []
-		for orf in (s[:-3] for s in o):
+		for orf in o:
 			if _genepredict_in_range(orf, start, end):
-				options.debug("Aligning %s against %s." % (sname, qname))
-
+				orf = orf[:-3]
 				query = translate(orf)
+				options.debug("Aligning %33s v. %33s." % (qname, sname))
+
 				alignments.append((orf,sname,align(subject.seq,query.seq)))
 			
 		max_match = (options.MIN_IDENTITY,None)
 		for orf, refname, alignment in alignments:
 			hitlen = alignment['sublength']
-			identity = (alignment['identities']+0.0)/alignment['length']
+			identity = float(alignment['identities'])/alignment['length']
 			if identity >= max_match[0]:
 				max_match = (identity,(orf[-3*hitlen:], sname, alignment))
 		if max_match[1]:
-			m = max_match[1]
-			defline = subject.defline.split('[')[0] + '[' + m[0].original.name + ']'
-			qout.put(sequ.Sequence(m[1],m[0].seq,defline=defline, original=m[0].original,
-        type=m[0].type,start=m[0].start,end=m[0].end,step=m[0].step))
+			seq, name, _ = max_match[1]
+			odl = subject.defline.split('[')[0]
+			src = seq.original.name
+			defline = '%s[%s]' % (odl, src)
+			qout.put(sequ.Sequence(name, seq.seq, defline=defline,
+				original=seq.original, type=seq.type,
+				start=seq.start, end=seq.end, step=seq.step))
 
 		qin.task_done()
 
-def _genepredict_in_range(seq,start,end):
-	return min(seq.start,seq.end) <= start and max(seq.start,seq.end) >= end
+def _genepredict_in_range(seq, start, end):
+	return min(seq.start, seq.end) <= start and \
+	       max(seq.start, seq.end) >= end
 
 def GeneFromBLAST(db, sequences, pref, names):
 	'''GeneFromBLAST(database, sequences, prefix)
@@ -106,8 +111,11 @@ BLASTs database against sequences, and for those results that pass the length an
 	except: pass
 
 	subj = dict((s.name, s) for s in io.open(db, 'r'))
+	options.debug("Database sequences loaded from file %s." % db)
 
-	try: orfs = dict((s.name, [orf for orf in ORFGenerator(s)]) for s in io.open(sequences, 'r'))
+	try:
+		orfs = dict((s.name, [orf for orf in ORFGenerator(s)]) for s in io.open(sequences, 'r'))
+		options.debug("ORFs loaded from file %s." % sequences)
 	except IOError: print "%d: No file \"" + sequences + ",\" skipping."
 
 	q_inputs, q_outputs = queue.Queue(), queue.Queue()
@@ -119,13 +127,15 @@ BLASTs database against sequences, and for those results that pass the length an
 			continue
 
 		sbjl  = len(subj[res['subject']['name']])
-		score = float(res['identities'].split('(')[1][:-2]) / 100 * \
-			float(res['subject']['length'])/sbjl
-		if score > options.MIN_IDENTITY * (1.0-options.LENGTH_ERR):
-			blastresults.append((score, res))
+		ident = float(res['identities'].split('(')[1][:-2]) / 100
+		lerr  = float(res['subject']['length'])/sbjl
+		options.debug((res['subject']['length'], sbjl, options.LENGTH_ERR))
+		
+		if ident >= options.MIN_IDENTITY:
+			if lerr >= (1.0-options.LENGTH_ERR):
+				blastresults.append(res)
 	
-	blastresults.sort()
-	for (score,res) in blastresults: 
+	for res in blastresults: 
 		q_inputs.put(res)
 	for i in range(options.NUM_THREADS-1):
 		curr = threading.Thread(target=_genepredict_target,args=(q_inputs,q_outputs,orfs,subj))
@@ -164,9 +174,7 @@ def run(subject, query, prefix, names):
 if __name__ == '__main__':
 	import sys
 	for f in sys.argv[1:]:
-		print f
 		for seq in io.open(f, 'r'):
-			#print ' ', len([None for orf in ORFGenerator(seq)])
-			print '  ' + seq.name + ':'
-			for orf in ORFGenerator(seq):
-				print '    ' + '\n    '.join(str(orf).split('\n'))
+			for orf in sorted(ORFGenerator(seq), key=lambda x: min(x.start, x.end)):
+				print (orf.start, orf.end)
+				print translate(orf[:-3])

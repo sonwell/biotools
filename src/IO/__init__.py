@@ -82,7 +82,9 @@ def _io_methods():
 		for s in read_fasta(fh):
 			c.add(s)
 			if s.seq:
-				for r in c: r.seq = s.seq
+				for r in c:
+					r.seq  = s.seq
+					r.type = s.type
 				yield c
 				c = set()
 		if c: yield c
@@ -106,7 +108,7 @@ def _io_methods():
 
 	def write_fasta(fh, s):
 		fh.write('>%s %s\n' % (s.name, s.defline) + \
-		         '\n'.join(chop(s.seq, 70)) + '\n')
+	  	       '\n'.join(chop(s.seq, 70)) + '\n')
 
 	def write_fastq(fh, s):
 		fh.write('@%s %s\n%s\n+\n%s\n' % (s.name, s.defline, s.seq, \
@@ -174,7 +176,7 @@ def _io_methods():
 		                           'probe': probe_clustalw},
 		'gff': {'rhook': nil,       'read': read_gff,
 	          'whook': whook_gff, 'write': write_gff,
-	                              'probe': probe_gff}
+	                              'probe': probe_gff},
 		'__order__': ['fasta','fastq','clustalw','gff']
 	}
 
@@ -283,6 +285,6 @@ def open(filename, mode='r'):
 	'''open(filename, mode='r')
 Open a file for parsing or creation. Returns either a Reader or Writer object, depending on the open mode.'''
 	if mode == 'r': return Reader(filename)
-	if mode == 'w': return Writer(filename)
+	if mode == 'w': return Writer(filename, mode='w')
 	if mode == 'a': return Writer(filename, mode='a')
   
