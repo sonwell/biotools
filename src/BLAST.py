@@ -62,7 +62,7 @@ Optional named arguments can currently only be evalue or num_threads.'''
 			sp  = db.rfind(sep)
 			odb = db
 			if sp > -1: dbdir, db = db[:sp], db[sp+1:pos]
-			else:       dbdir = '.'
+			else:       dbdir, db = '.', db[:pos]
 
 			for file in os.listdir(dbdir):
 				dpos = file.rfind('.')
