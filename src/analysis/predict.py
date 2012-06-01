@@ -49,9 +49,14 @@ Scans both strands of the give sequence and yields the longest subsequence that 
 	raise StopIteration
 	
 def _genepredict_target(qin,qout,orfs,subj):
-	while not qin.empty():
-		try: res = qin.get(PIPING, 10)
-		except: break
+	while 1:
+		try: res = qin.get(PIPING, 1)
+		except queue.Empty:
+			if not PIPING:
+				break
+			else:
+				continue
+
 		qname, sname = res['query']['name'],  res['subject']['name']
 		start, end   = res['query']['start'], res['query']['end']
 
@@ -102,6 +107,21 @@ def _genepredict_in_range(seq, start, end):
 	return min(seq.start, seq.end) <= start and \
 	       max(seq.start, seq.end) >= end
 
+class ThreadQueue(queue.Queue):
+	def __init__(self, qout, orfs, subj):
+		queue.Queue.__init__(self)
+		self.threadcount = 0
+		self.qout = qout
+		self.orfs = orfs
+		self.subj = subj
+
+	def put(self, item):
+		queue.Queue.put(self, item)
+		if self.threadcount < options.NUM_THREADS - 1:
+			thread = threading.Thread(target=_genepredict_target,
+				args=(self, self.qout, self.orfs, self.subj))
+			thread.start()
+
 def GeneFromBLAST(db, sequences, pref, names):
 	'''GeneFromBLAST(database, sequences, prefix)
 BLASTs database against sequences, and for those results that pass the length and percent identity requirements, attempt to locate the full gene that corresponds to that BLAST hit. Genes that are found are saved in the subdirectory sequences under the given directory, divided depending on whether the sequnece is amino acid or nucleotide.'''
@@ -126,11 +146,8 @@ BLASTs database against sequences, and for those results that pass the length an
 		options.debug("ORFs loaded from file %s." % sequences)
 	except IOError: options.debug("%d: No file \"" + sequences + ",\" skipping.")
 
-	q_inputs, q_outputs = queue.Queue(), queue.Queue()
-
-	for i in range(options.NUM_THREADS-1):
-		curr = threading.Thread(target=_genepredict_target,args=(q_inputs,q_outputs,orfs,subj))
-		curr.start()
+	q_outputs = queue.Queue()
+	q_inputs  = ThreadQueue(q_outputs, orfs, subj)
 
 	blastopts = {'evalue': options.MAX_EVALUE, 'num_threads': options.NUM_THREADS}	
 	for res in BLAST.run(db, sequences, **blastopts): 
@@ -145,6 +162,7 @@ BLASTs database against sequences, and for those results that pass the length an
 			if lerr >= (1.0-options.LENGTH_ERR):
 				q_inputs.put(res)
 	PIPING = False
+	options.debug("BLAST done.")
 	
 	_genepredict_target(q_inputs,q_outputs,orfs,subj)
 	q_inputs.join()
