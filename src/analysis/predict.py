@@ -82,10 +82,13 @@ def _genepredict_target(qin,qout,orfs,subj):
 				max_match = (identity,(orf[-3*hitlen:], sname, alignment))
 		if max_match[1]:
 			seq, name, _ = max_match[1]
-			odl = subject.defline.split('[')[0]
+			odl = subject.defline.split('[')[0].strip()
 			src = seq.original.name
-			defline = '%s[%s]' % (odl, src)
-			qout.put(sequ.Sequence(name, seq.seq, defline=defline,
+			start, end, strand = seq.start, seq.end, seq.step
+			defline = '%s[source=%s] [start=%d] [end=%d] [strand=%d]' % \
+				(odl + (' ' if odl else ''), src, start, end, strand)
+				
+			qout.put(sequ.Sequence(name.strip(), seq.seq, defline=defline,
 				original=seq.original, type=seq.type,
 				start=seq.start, end=seq.end, step=seq.step))
 
@@ -129,7 +132,6 @@ BLASTs database against sequences, and for those results that pass the length an
 		sbjl  = len(subj[res['subject']['name']])
 		ident = float(res['identities'].split('(')[1][:-2]) / 100
 		lerr  = float(res['subject']['length'])/sbjl
-		options.debug((res['subject']['length'], sbjl, options.LENGTH_ERR))
 		
 		if ident >= options.MIN_IDENTITY:
 			if lerr >= (1.0-options.LENGTH_ERR):

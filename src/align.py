@@ -27,7 +27,7 @@ This function returns a dictionary of relevent information from the alignment; s
 	pnt = [[VGAP_MARK if i>j else HGAP_MARK if j>i else DIAG_MARK \
 		for i in range(lw+1)] for j in range(lv+1)]
 	ids = [[0 for i in range(lw+1)] for j in range(lv+1)]
-	optimal = [0, 0, 0]
+	optimal = [None, 0, 0]
 	for i in range(lv):
 		for j in range(lw):
 			vals = [[mat[i][j]+bl[v[i],w[j]],DIAG_MARK], \
@@ -35,13 +35,13 @@ This function returns a dictionary of relevent information from the alignment; s
 				[mat[i][j+1]-gp-c*gpc[i][j+1],HGAP_MARK]]
 			mat[i+1][j+1],pnt[i+1][j+1] = max(vals)
 			gpc[i+1][j+1] = int(pnt[i+1][j+1] == DIAG_MARK)
-			ids[i+1][j+1] = max((ids[i][j]+int(v[i] == w[j]), ids[i][j+1], ids[i+1][j]))
 			if w[j] in starts:
-				if ids[i+1][j+1] > optimal[0] and abs(lv - i)/float(lv) <= options.LENGTH_ERR:
-					optimal = [ids[i+1][j+1], i+1, j+1]
+				if (optimal[0] == None or mat[i+1][j+1] > optimal[0]) and \
+					 abs(lv - i)/float(lv) <= options.LENGTH_ERR:
+					optimal = [mat[i+1][j+1], i+1, j+1]
 
-	i, j = optimal[1], optimal[2]
-	seq = ['','']
+	i, j     = optimal[1], optimal[2]
+	seq, ids = ['',''], 0
 	gapcount, length, sublen = 0, 0, 0
 	while [i,j] != [0,0]:
 		length += 1
@@ -56,6 +56,7 @@ This function returns a dictionary of relevent information from the alignment; s
 			i -= 1
 			j -= 1
 			sublen += 1
+			ids += int(w[j-1] == v[i-1])
 		elif direction == HGAP_MARK:
 			seq = [v[i-1]+seq[0],'-'+seq[1]]
 			i -= 1
@@ -65,12 +66,11 @@ This function returns a dictionary of relevent information from the alignment; s
 	return {
 		'subject':    seq[0][::-1],
 		'query':      seq[1][::-1],
-		'score':      mat[optimal[1]][optimal[2]],
-		'perfect':    sum(bl[l,l] for l in v),
+		'score':      optimal[0],
 		'gaps':       gapcount,
 		'length':     length,
 		'sublength':  sublen,
-		'identities': optimal[0]
+		'identities': ids
 	}
 
 if __name__ == "__main__":
