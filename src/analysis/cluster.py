@@ -68,7 +68,9 @@ def _run_clustal(q, clusters, direc, names):
 	while not q.empty():
 		n = 0
 		cid = q.get()
-		dig = hashlib.md5().update(' '.join(cid)).hexdigest()
+		dig = hashlib.md5()
+		dig.update(' '.join(cid))
+		dig = dig.hexdigest()
 
 		fpre = direc + 'nt' + sep + dig
 		apre = direc + 'aa' + sep + dig
