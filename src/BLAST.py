@@ -51,6 +51,7 @@ Optional named arguments can currently only be evalue or num_threads.'''
 			except IOError: pass
 				
 	if not dbtype:
+		odb = db
 		pos = db.rfind(".")
 		if pos >= 0 and db[pos+1:] in ["txt","fasta","fa","fas"]:
 			for seq in io.open(db, 'r'):
@@ -70,7 +71,8 @@ Optional named arguments can currently only be evalue or num_threads.'''
 					fh = open(dbdir + sep + file, 'r')
 					c = ord(fh.read(12)[-1])
 					fname = fh.read(c)
-					if db in fname:
+					if fname[0] in ("'", '"'): fname = fname[1:-1]
+					if fname.endswith(odb):
 						ndb = dbdir + sep + file[:dpos]
 						break
 			if not ndb:
@@ -98,9 +100,10 @@ Optional named arguments can currently only be evalue or num_threads.'''
 		allowed = ["e", "a"]
 
 	if sys.platform in ('win32'): cmd += '.exe'
-	return Result(iter(subprocess.Popen([cmd,pn[0],db,pn[1],sfile] + \
+	proc = subprocess.Popen([cmd,pn[0],db,pn[1],sfile] + \
 				 [arg for pair in [["-"+k,str(kwargs[k])] for k in allowed] for arg in pair],
-	       bufsize=1, stdout=subprocess.PIPE).stdout.readline, ''))
+	       bufsize=1, stdout=subprocess.PIPE)
+	return Result(iter(proc.stdout.readline, ''))
 		
 class Result(object):
 	'''Class BLASTResult
@@ -116,7 +119,7 @@ The class instance has a single other property, headers, which are the lines in 
 		self.headers = []
 		
 	def __iter__(self):
-		try: ipt = open(self.file, 'r')
+		try:    ipt = open(self.file, 'r')
 		except: ipt = self.file
 		mode = 0
 		headers = []
