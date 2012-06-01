@@ -56,7 +56,7 @@ Optional named arguments can currently only be evalue or num_threads.'''
 			for seq in io.open(db, 'r'):
 				dbtype = seq.type
 				break
-			if not dbtype: raise IOError, "Database not found: " + db
+			if not dbtype: raise IOError("Database not found: " + db)
 
 			ndb = None
 			sp  = db.rfind(sep)
@@ -67,10 +67,10 @@ Optional named arguments can currently only be evalue or num_threads.'''
 			for file in os.listdir(dbdir):
 				dpos = file.rfind('.')
 				if dpos >= 0 and file[dpos+1:] == dbtype[0] + 'in':
-					fh = open(dbdir + sep + file,'r')
+					fh = open(dbdir + sep + file, 'r')
 					c = ord(fh.read(12)[-1])
 					fname = fh.read(c)
-					if fname in set([db,'"%s"'%db]):
+					if db in fname:
 						ndb = dbdir + sep + file[:dpos]
 						break
 			if not ndb:
@@ -88,7 +88,7 @@ Optional named arguments can currently only be evalue or num_threads.'''
 				                 stdout=ignore)
 				db = ndb
 			else: db = ndb
-		else: raise IOError, "Database not found: " + db
+		else: raise IOError("Database not found: " + db)
 	allowed = set(["evalue", "gapopen", "gapextend", "num_threads"]) & set(kwargs.keys())
 	cmd = cmds[qtype][dbtype]
 	pn = ["-db", "-query"]
@@ -97,9 +97,10 @@ Optional named arguments can currently only be evalue or num_threads.'''
 		pn = ["-d", "-i"]
 		allowed = ["e", "a"]
 
-	if sys.platform in ('win32', 'cygwin'): cmd += '.exe'
-	return Result(subprocess.check_output([cmd,pn[0],db,pn[1],sfile] + \
-				 [arg for pair in [["-"+k,str(kwargs[k])] for k in allowed] for arg in pair]).split('\n'))
+	if sys.platform in ('win32'): cmd += '.exe'
+	return Result(iter(subprocess.Popen([cmd,pn[0],db,pn[1],sfile] + \
+				 [arg for pair in [["-"+k,str(kwargs[k])] for k in allowed] for arg in pair],
+	       bufsize=1, stdout=subprocess.PIPE).stdout.readline, ''))
 		
 class Result(object):
 	'''Class BLASTResult
@@ -232,7 +233,3 @@ The class instance has a single other property, headers, which are the lines in 
 		yield ra(subheaders)
 		raise StopIteration
 
-if __name__ == "__main__":
-	import sys
-	for result in BLAST(sys.argv[1],sys.argv[2]):
-		print result or "BUGGY BUGGY BOO"

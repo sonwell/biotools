@@ -121,7 +121,7 @@ These variables are:
 
 	opts.processes = min(opts.processes, len(largs))
 	if not (0 <= opts.fraction <= 1):
-		raise RuntimeError, "Allowable length error must be between 0 and 1, inclusive."
+		raise RuntimeError("Allowable length error must be between 0 and 1, inclusive.")
 
 	LENGTH_ERR    = opts.fraction
 	MIN_IDENTITY  = opts.identity

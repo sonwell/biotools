@@ -9,7 +9,5 @@ Creates the complement of a sequence, which can then be reversed by using seq[::
 
   value = ''.join(_ref.get(c,'N') for c in s.upper())
   try: return s.__class__("complement(%s)" % s.name, value, original=s.original,start=s.start,end=s.end,step=s.step)
-  except AttributeError, TypeError: return s.__class__(value)
+  except (AttributeError, TypeError): return s.__class__(value)
 
-if __name__ == "__main__":
-  print complement(sys.argv[1][::-1])

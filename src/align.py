@@ -18,7 +18,7 @@ This function returns a dictionary of relevent information from the alignment; s
 	except AttributeError: pass
 	try: w = w.seq
 	except AttributeError: pass
-	if not starts & set(w): raise ValueError, "Open reading frame does not contain a start codon."
+	if not starts & set(w): raise ValueError("Open reading frame does not contain a start codon.")
 
 	v, w = v[::-1], w[::-1]
 	lv, lw = len(v), len(w)
@@ -73,7 +73,3 @@ This function returns a dictionary of relevent information from the alignment; s
 		'identities': ids
 	}
 
-if __name__ == "__main__":
-	import sys
-	stuff = OptimalCTether(sys.argv[1],sys.argv[2])
-	print stuff

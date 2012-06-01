@@ -3,7 +3,8 @@
 import biotools.analysis.predict as genepredict
 import biotools.analysis.options as options
 import threading, sys, os
-import Queue as queue
+try: import Queue as queue
+except: import queue
 
 def _run_genepredict(q, infile, names):
 	while 1:

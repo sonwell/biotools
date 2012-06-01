@@ -8,7 +8,9 @@ from biotools.align      import OptimalCTether as align
 from biotools.translate  import *
 from biotools.complement import *
 
-import Queue as queue
+try: import Queue as queue
+except: import queue
+
 import threading
 import random, sys, os
 
@@ -119,7 +121,7 @@ BLASTs database against sequences, and for those results that pass the length an
 	try:
 		orfs = dict((s.name, [orf for orf in ORFGenerator(s)]) for s in io.open(sequences, 'r'))
 		options.debug("ORFs loaded from file %s." % sequences)
-	except IOError: print "%d: No file \"" + sequences + ",\" skipping."
+	except IOError: print ("%d: No file \"" + sequences + ",\" skipping.")
 
 	q_inputs, q_outputs = queue.Queue(), queue.Queue()
 	blastresults = []
@@ -173,10 +175,3 @@ BLASTs database against sequences, and for those results that pass the length an
 def run(subject, query, prefix, names):
 	GeneFromBLAST(subject, query, prefix, names)
 
-if __name__ == '__main__':
-	import sys
-	for f in sys.argv[1:]:
-		for seq in io.open(f, 'r'):
-			for orf in sorted(ORFGenerator(seq), key=lambda x: min(x.start, x.end)):
-				print (orf.start, orf.end)
-				print translate(orf[:-3])
