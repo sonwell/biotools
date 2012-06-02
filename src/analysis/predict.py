@@ -76,7 +76,7 @@ def _genepredict_target(qin,qout,orfs,subj):
 
 		alignments = []
 		for orf in o:
-			if _genepredict_in_range(orf, start, end):
+			if _genepredict_in_range(orf, start, end, res['frame']):
 				orf = orf[:-3]
 				query = translate(orf)
 				options.debug("Aligning %33s v. %33s." % (qname, sname))
@@ -103,9 +103,15 @@ def _genepredict_target(qin,qout,orfs,subj):
 
 		qin.task_done()
 
-def _genepredict_in_range(seq, start, end):
-	return min(seq.start, seq.end) <= start and \
-	       max(seq.start, seq.end) >= end
+def _genepredict_in_range(seq, start, end, frame):
+	ss, se = sorted((seq.start, seq.end))
+	os, oe = sorted((start, end))
+	frame  = int(frame)
+
+	return ss <= os and se >= oe and \
+	     (se%3 == oe%3 or ss%3 == oe%3) and \
+	     ((frame < 0 and seq.step < 0) or \
+	      (frame > 0 and seq.step > 0))
 
 class ThreadQueue(queue.Queue):
 	def __init__(self, qout, orfs, subj):
