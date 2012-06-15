@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import biotools.IO as io
 import subprocess
-import os, sys
+import os, sys, shutil
 
 def run(db, sfile, mega_blast=False, **kwargs):
 	'''BLAST(database, query, **params)
@@ -57,11 +57,10 @@ Optional named arguments can currently only be evalue or num_threads.'''
 			for seq in io.open(db, 'r'):
 				dbtype = seq.type
 				break
-			if not dbtype: raise IOError("Database not found: " + db)
+			if not dbtype: raise IOError("Database not found: " + odb)
 
 			ndb = None
 			sp  = db.rfind(sep)
-			odb = db
 			if sp > -1: dbdir, db = db[:sp], db[sp+1:pos]
 			else:       dbdir, db = '.', db[:pos]
 
@@ -76,7 +75,7 @@ Optional named arguments can currently only be evalue or num_threads.'''
 						ndb = dbdir + sep + file[:dpos]
 						break
 			if not ndb:
-				ndb = dbdir + sep + '_'.join(db.split())
+				ndb = '_'.join(db.split())
 				try:
 					ignore = open('/dev/null','w')
 					mbdb	 = 'makeblastdb'
@@ -88,7 +87,11 @@ Optional named arguments can currently only be evalue or num_threads.'''
 				                 "-out", ndb,
 				                 "-dbtype",dbtype],
 				                 stdout=ignore)
-				db = ndb
+				if dbdir != '.' + sep:
+					for suff in ['in', 'hr', 'sq']:
+						shutil.copyfile(ndb + '.' + dbtype[0] + suff,
+          		dbdir + sep + ndb + '.' + dbtype[0] + suff)
+				db = dbdir + sep + ndb
 			else: db = ndb
 		else: raise IOError("Database not found: " + db)
 	allowed = set(["evalue", "gapopen", "gapextend", "num_threads"]) & set(kwargs.keys())
