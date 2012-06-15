@@ -1,4 +1,4 @@
-_gencode = 
+_gencode = { 
 	'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
 	'AUA':'I', 'AUC':'I', 'AUU':'I', 'AUG':'M',
 	'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
@@ -44,3 +44,7 @@ Translate a nucleotide using the standard genetic code. The sequence parameter c
     value = ''.join(_gencode.get(x[i:i+3].upper(),'X') for i in xrange(0,len(x)/3*3,3))
     return x.__class__(value)
 
+
+if __name__ == '__main__':
+  print translate('ATGTAA')
+  print translate('AUGUAA')
