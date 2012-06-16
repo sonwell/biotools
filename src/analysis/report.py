@@ -6,8 +6,8 @@ def report(plotdata, **kwargs):
 	pass 
 
 # wraps biotools.analysis.plot.plot()
-def plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, \
-		filename='untitled.pdf', upperbound=0.05, factor=21, \
+def plot(plotdata, directory, bottom=True, side=True, legend=True, \
+		save=True, filename='untitled.pdf', upperbound=0.05, factor=21, \
 		fig=plt.figure(None, facecolor='w', edgecolor='w'), **kwargs):
 
 	ranges = report(plotdata, **kwargs)
@@ -72,7 +72,8 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, \
 	for i, c in zip(xrange(len(counts)), counts):
 		ax.text(laa + 10, lowerbound/3*(i+1.25), c)
 	if legend:
-		fig.legend((nt_lines, aa_lines), ('Nucleotide', 'Amino acid'), 'upper right')
+		fig.legend((nt_lines, aa_lines), ('Nucleotide', 'Amino acid'), 
+			'upper right')
 
 	if save:
 		fig.savefig(directory+filename)

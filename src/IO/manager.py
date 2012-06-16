@@ -11,6 +11,7 @@ From the above example, methods is a dictionary with keys rhook, read, whook, wr
 * probe => takes a file handle, opened for reading; returns a dictionary of attributes to be applied to the IOBase instance.
 
 This class behaves similarly to a dicitonary, except that the get method will default to the default method (which does nothing) if no truthy second parameter is passed.'''
+
 	def __init__(self, methods=None):
 		'''IOManager(methods=None)
 Instantiates an IOManager with methods, where the keys of methods are the formats and the values are dictionaries with rhook, whook, read, write, and probe callables.'''
@@ -22,7 +23,7 @@ Instantiates an IOManager with methods, where the keys of methods are the format
 		self.methods   = methods or {}
 		self.protected = set(self.methods.keys())
 
-		nil = lambda *x: None
+		nil = lambda *x: iter([])
 		self.default = {'rhook': nil, 'read':  nil,
 		                'whook': nil, 'write': nil,
 										'probe': nil}
@@ -43,4 +44,4 @@ Instantiates an IOManager with methods, where the keys of methods are the format
 		return value
 
 	def __iter__(self):
-		return (self.methods[k] for k in self.order)
+		return iter(self.order)

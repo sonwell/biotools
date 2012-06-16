@@ -1,7 +1,9 @@
 #!/usr/bin/python
 import biotools.IO as io
 import subprocess
-import os, sys, shutil
+import os
+import sys
+import shutil
 
 def run(db, sfile, mega_blast=False, **kwargs):
 	'''BLAST(database, query, **params)
@@ -36,7 +38,8 @@ Optional named arguments can currently only be evalue or num_threads.'''
 
 	dbtype = None
 	bdbenv = os.getenv("BLASTDB")
-	dblocations = (":." + ((':' + bdbenv) if bdbenv else '') + ((':' +rcloc) if rcloc else '')).split(':')
+	dblocations = (":." + ((':' + bdbenv) if bdbenv else '') + \
+		((':' +rcloc) if rcloc else '')).split(':')
 	for loc in dblocations:
 		if loc and loc[-1] != sep: loc += sep
 		try:
@@ -77,24 +80,26 @@ Optional named arguments can currently only be evalue or num_threads.'''
 			if not ndb:
 				ndb = '_'.join(db.split())
 				try:
-					ignore = open('/dev/null','w')
+					ignore = open('/dev/null', 'w')
 					mbdb	 = 'makeblastdb'
 				except:
 					ignore = open('nul', 'w')
 					mbdb	 = 'makeblastdb.exe'
 
-				subprocess.call([mbdb,"-in",'"%s"' % odb,
+				subprocess.call([mbdb, "-in", '"%s"' % odb,
 				                 "-out", ndb,
-				                 "-dbtype",dbtype],
+				                 "-dbtype", dbtype],
 				                 stdout=ignore)
-				if dbdir != '.' + sep:
+				try:
 					for suff in ['in', 'hr', 'sq']:
 						shutil.copyfile(ndb + '.' + dbtype[0] + suff,
-          		dbdir + sep + ndb + '.' + dbtype[0] + suff)
+							dbdir + sep + ndb + '.' + dbtype[0] + suff)
+				except shutil.Error: pass
 				db = dbdir + sep + ndb
 			else: db = ndb
 		else: raise IOError("Database not found: " + db)
-	allowed = set(["evalue", "gapopen", "gapextend", "num_threads"]) & set(kwargs.keys())
+	allowed = set(["evalue", "gapopen", "gapextend", "num_threads"]) & \
+		set(kwargs.keys())
 	cmd = cmds[qtype][dbtype]
 	pn = ["-db", "-query"]
 	if mega_blast:
@@ -103,17 +108,20 @@ Optional named arguments can currently only be evalue or num_threads.'''
 		allowed = ["e", "a"]
 
 	if sys.platform in ('win32'): cmd += '.exe'
-	proc = subprocess.Popen([cmd,pn[0],db,pn[1],sfile] + \
-				 [arg for pair in [["-"+k,str(kwargs[k])] for k in allowed] for arg in pair],
-	       bufsize=1, stdout=subprocess.PIPE)
+	proc = subprocess.Popen([cmd, pn[0], db, pn[1], sfile] + \
+		[arg for pair in [["-"+k, str(kwargs[k])] for k in allowed] \
+			for arg in pair],
+		bufsize=1, stdout=subprocess.PIPE)
 	return Result(iter(proc.stdout.readline, ''))
-		
+
+
 class Result(object):
+
 	'''Class BLASTResult
 A class which take the raw output from BLAST and generates dictionaries from the data from BLAST. This data includes the alignment, percetn identity, gaps, e-value, score, length of subject, length of query, and start and stop positions for both sequences.
 
 This class should be used in a for loop like so: 
-    for res in Result(file_or_data): pass
+		for res in Result(file_or_data): pass
 
 The class instance has a single other property, headers, which are the lines in BLAST results before the BLAST hits (e.g., citation info, etc.).'''
 

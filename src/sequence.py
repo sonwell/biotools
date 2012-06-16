@@ -1,21 +1,23 @@
 from biotools.annotation import Annotation
 
+
 def chop(seq,length = 70):
 	'''chop( sequence, length = 70 )
 Yields a chunk of a sequence of no more than length characters,
 it is meant to be used to print fasta files.'''
 
 	while seq:
-		try: piece,seq = seq[:length],seq[length:]
-		except: piece,seq = seq,''
+		try: piece, seq = seq[:length], seq[length:]
+		except: piece, seq = seq, ''
 		yield piece
 	raise StopIteration
+
 
 class Sequence(object):
 	'''class Sequence
 A wrapper class for sequences.'''
 
-	def __init__(self,name,seq,**kwargs):
+	def __init__(self, name, seq, **kwargs):
 		'''Sequence( name, sequence, ... )
 Instantiates a Sequence object with a given sequence. Some other useful
 parameters that the Sequence constructor can handle are:
@@ -35,7 +37,8 @@ if end < start, then step is probably -1).'''
 		self.name = name
 		self.seq = seq.upper()
 		self.qual = kwargs.get('qual',None)
-		self.type = kwargs.get('type','prot' if set(seq)-set('ATCGNYR') else 'nucl')
+		self.type = kwargs.get('type','prot' if set(seq)-set('ATUCGNYR') \
+			else 'nucl')
 		self.start = kwargs.get('start',1)
 		self.end = kwargs.get('end',len(seq))
 		self.step = kwargs.get('step', -1 if self.start > self.end else 1)
@@ -58,9 +61,10 @@ if end < start, then step is probably -1).'''
 		pstart, pend = (self.start, self.end)[::sorder]
 		newstart, newend = pstart + dstart, pstart + dend
 
-		return Sequence("subsequence(%s,%d,%d,%d)" % (self.name, start, stop, step),
-		                seq, qual=qual, original=self.original, type=self.type,
-									 start=newstart, end=newend, step=step * self.step)
+		info = (self.name, start, stop, step)
+		return Sequence("subsequence(%s,%d,%d,%d)" % info, seq, 
+			qual=qual, original=self.original, type=self.type,
+			start=newstart, end=newend, step=step * self.step)
 
 	'''Some other things you can do with a Sequence object:
 * len(sequence)		=> gives the length of the sequence.
@@ -71,32 +75,47 @@ if end < start, then step is probably -1).'''
 * print sequence	 => print a fasta / fastq (depending on whether there are any quality scores) representation of the sequence. Sequence objects in any other data structure (e.g., list, dictionary) are printed as (e.g., <Sequence 0x000000>). If you want to change that, you can do:
 	def __repr__(self): return self.__str__()'''
 
-	def __len__(self):			 return len(self.seq)
+	def __len__(self):
+		return len(self.seq)
 		
-	def upper(self):				 return self
+	def upper(self):
+		return self
 	
 	def __iter__(self):
-		for i in xrange(len(self)): yield self.seq[i:i+1]
+		for i in xrange(len(self)):
+			yield self.seq[i:i+1]
 		raise StopIteration
 		
-	def __hash__(self):			return self.seq.__hash__();
+	def __hash__(self):	
+		return self.seq.__hash__();
 		
 	def __eq__(self,other):
-		try:									 return self.seq == other.seq and self.name == other.name
-		except AttributeError: return (self.seq == other)
+		try:
+			return self.seq == other.seq and self.name == other.name
+		except AttributeError:
+			return (self.seq == other)
 			
 	def __str__(self):
-		if self.qual:					return '@%s\n%s\n+\n%s' % (self.name, self.seq, ''.join(chr(ord('A')-1+q) for q in self.qual))
-		else:									return '>%s %s\n%s' % (self.name, self.defline, '\n'.join(chop(self.seq,70)))
+		if self.qual:
+			return '@%s\n%s\n+\n%s' % (self.name, self.seq, 
+				''.join(chr(ord('A')-1+q) for q in self.qual))
+		else:
+			return '>%s %s\n%s' % (self.name, self.defline, 
+				'\n'.join(chop(self.seq,70)))
 
-def annotation(seq,source,type,**kwargs):
+	def __contains__(self, sub):
+		return sub in self.seq
+
+
+def annotation(seq, source, type, **kwargs):
 	'''annotation(sequence, source, type, **kwargs)
 Creates an Annotation object for the given sequence from a source (e.g., "phytozome7.0") of a particular type (e.g., "gene").'''
 	try: sname = source.name
 	except AttributeError: sname = source
 	
-	start,end = min(seq.start,seq.end),max(seq.start,seq.end)
+	start, end = min(seq.start, seq.end), max(seq.start, seq.end)
 	strand = '+' if seq.step == 1 else '-'
-	attrs = ';'.join('%s=%s'%(key,str(kwargs[key])) for key in kwargs)
+	attrs = ';'.join('%s=%s' % (key, str(kwargs[key])) for key in kwargs)
 	
-	return Annotation(seq.original.name,sname,type,start,end,'.',strand,start%3,attrs)
+	return Annotation(seq.original.name, sname, type, start, end, '.',
+		strand, start % 3, attrs)

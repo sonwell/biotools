@@ -1,8 +1,10 @@
 #!/usr/bin/python
-_ref = {'DNA': {'A':'T','T':'A','C':'G','G':'C','R':'Y','Y':'R'},
-        'RNA': {'A':'U','U':'A','C':'G','G':'C','R':'Y','Y':'R'}}
-
 import sys
+
+_ref = {
+	'DNA': {'A':'T','T':'A','C':'G','G':'C','R':'Y','Y':'R'},
+	'RNA': {'A':'U','U':'A','C':'G','G':'C','R':'Y','Y':'R'}
+}
 
 def complement(s):
 	'''complement( sequence )
@@ -16,8 +18,11 @@ Creates the complement of a sequence, which can then be reversed by using seq[::
 		repl = _ref['DNA']
 	else: return s # must be a strange protein or something
 	value = ''.join(repl.get(c,'N') for c in s.upper())
-	try: return s.__class__("complement(%s)" % s.name, value, original=s.original,start=s.start,end=s.end,step=s.step)
+	try:
+		return s.__class__("complement(%s)" % s.name, value, 
+			original=s.original,start=s.start,end=s.end,step=s.step)
 	except (AttributeError, TypeError): return s.__class__(value)
+
 
 if __name__ == '__main__':
 	assert complement('ATCGTAGCTGATCGAT') == 'TAGCATCGACTAGCTA'

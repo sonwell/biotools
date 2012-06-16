@@ -29,9 +29,10 @@ def parse(ipt):
 	def variable():
 		whitespace()
 		start = _pos
-		while ('0' <= _char <= '9') or \
-		      ('A' <= _char <= 'Z') or \
-		      ('a' <= _char <= 'z'):
+		while \
+				('0' <= _char <= '9') or \
+				('A' <= _char <= 'Z') or \
+				('a' <= _char <= 'z'):
 			advance()
 		stop = _pos
 		whitespace()
@@ -97,9 +98,9 @@ def parse(ipt):
 		while _char != q:
 			if _char == '\\':
 				advance('\\')
-				if _char == 'n':   ret += '\n'
+				if _char == 'n': ret += '\n'
 				elif _char == 't': ret += '\t'
-				else:              ret += _char
+				else: ret += _char
 				advance()
 				continue
 			ret += _char

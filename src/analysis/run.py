@@ -21,6 +21,7 @@ def _run_genepredict(q, infile, names):
 		except RuntimeError: pass
 		q.task_done()
 
+
 def run(infile, strains):
 	'''run()
 Run several instances of genepredict.run at once.'''
@@ -31,7 +32,8 @@ Run several instances of genepredict.run at once.'''
 
 	filenames = []
 	for i in range(options.NUM_PROCESSES-1):
-		curr = threading.Thread(target=_run_genepredict, args=(q, infile, filenames))
+		curr = threading.Thread(target=_run_genepredict,
+			args=(q, infile, filenames))
 		curr.start()
 
 	_run_genepredict(q, infile, filenames)

@@ -12,7 +12,9 @@ try: import Queue as queue
 except: import queue
 
 import threading
-import random, sys, os
+import random
+import sys
+import os
 
 PIPING = True
 
@@ -122,11 +124,14 @@ class ThreadQueue(queue.Queue):
 		self.subj = subj
 
 	def put(self, item):
+		options.lock.acquire()
 		queue.Queue.put(self, item)
 		if self.threadcount < options.NUM_THREADS - 1:
 			thread = threading.Thread(target=_genepredict_target,
 				args=(self, self.qout, self.orfs, self.subj))
 			thread.start()
+			self.threadcount += 1
+		options.lock.release()
 
 def GeneFromBLAST(db, sequences, pref, names):
 	'''GeneFromBLAST(database, sequences, prefix)
@@ -148,14 +153,21 @@ BLASTs database against sequences, and for those results that pass the length an
 	options.debug("Database sequences loaded from file %s." % db)
 
 	try:
-		orfs = dict((s.name, [orf for orf in ORFGenerator(s)]) for s in io.open(sequences, 'r'))
+		orfs = dict((s.name, [orf for orf in ORFGenerator(s)]) \
+			for s in io.open(sequences, 'r'))
 		options.debug("ORFs loaded from file %s." % sequences)
-	except IOError: options.debug("%d: No file \"" + sequences + ",\" skipping.")
+	except IOError:
+		options.debug("No file \"" + sequences + ",\" skipping.")
+		return
 
 	q_outputs = queue.Queue()
 	q_inputs  = ThreadQueue(q_outputs, orfs, subj)
 
-	blastopts = {'evalue': options.MAX_EVALUE, 'num_threads': options.NUM_THREADS}	
+	blastopts = {
+		'evalue': options.MAX_EVALUE,
+		'num_threads': options.NUM_THREADS
+	}
+	
 	for res in BLAST.run(db, sequences, **blastopts): 
 		if float(res['expect']) > options.MAX_EVALUE:
 			continue
@@ -193,7 +205,8 @@ BLASTs database against sequences, and for those results that pass the length an
 		c = set((translate(s), s) for s in seqs[id])
 		for t,s in c: t.name = s.name
 		ah.write(t for t, s in c)
-		gh.write(sa(seqs[id].copy().pop(),pref,'gene',homologs=','.join(s.name for s in seqs[id])))
+		gh.write(sa(seqs[id].copy().pop(), pref, 'gene', 
+			homologs=','.join(s.name for s in seqs[id])))
 	fh.close()
 	ah.close()
 	gh.close()

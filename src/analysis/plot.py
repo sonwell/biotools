@@ -10,8 +10,8 @@ def smoothed(unsmoothed, factor):
 	wm = np.array([x/sum(x) for x in c])
 	return np.dot(unsmoothed, wm.transpose())
 
-def plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, \
-		filename='untitled.pdf', upperbound=0.05, factor=21, \
+def plot(plotdata, directory, bottom=True, side=True, legend=True, 
+		save=True, filename='untitled.pdf', upperbound=0.05, factor=21,
 		fig=plt.figure(None, facecolor='w', edgecolor='w'), **kwargs):
 
 	sep = os.sep
@@ -50,8 +50,10 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, \
 	models(starts, ends, counts, bound, ax, **kwargs)
 	report(ntvar, aavar, lnt, laa)
 
-	if legend: fig.legend((ntl, aal), ('Nucleotide', 'Amino acid'), 'upper right')
-	if save: fig.savefig(directory+filename)
+	if legend: 
+		fig.legend((ntl, aal), ('Nucleotide', 'Amino acid'), 'upper right')
+	if save: 
+		fig.savefig(directory+filename)
 
 def axes(bottom, side, bound, fig, **kwargs):
 	# create the proper sized frame, depending on
@@ -85,8 +87,9 @@ def axes(bottom, side, bound, fig, **kwargs):
 				spine.set_color('none')
 				ax.tick_params('y', which='both', color='none', labelcolor='none')
 
-	ax.hlines(ax.get_yticks(), xs[0], xs[1], color='0.75', linestyle='dashed')
-	ax.hlines(0,               xs[0], xs[1], color='k',    linestyle='solid')
+	ax.hlines(ax.get_yticks(), xs[0], xs[1], color='0.75', 
+		linestyle='dashed')
+	ax.hlines(0, xs[0], xs[1], color='k', linestyle='solid')
 	return ax
 
 def draw(x, y, ax, color, **kwargs):

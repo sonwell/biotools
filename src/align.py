@@ -18,12 +18,14 @@ This function returns a dictionary of relevent information from the alignment; s
 	except AttributeError: pass
 	try: w = w.seq
 	except AttributeError: pass
-	if not starts & set(w): raise ValueError("Open reading frame does not contain a start codon.")
+	if not starts & set(w):
+		raise ValueError("Open reading frame does not contain a start codon.")
 
 	v, w = v[::-1], w[::-1]
 	lv, lw = len(v), len(w)
 	gpc = [[int(not (i|j)) for i in range(lw+1)] for j in range(lv+1)]
-	mat = [[-(i+j)*gp-c*(not (i|j) and w[0] != v[0]) for i in range(lw+1)] for j in range(lv+1)]
+	mat = [[-(i+j)*gp-c*(not (i|j) and w[0] != v[0]) for i in range(lw+1)] \
+		for j in range(lv+1)]
 	pnt = [[VGAP_MARK if i>j else HGAP_MARK if j>i else DIAG_MARK \
 		for i in range(lw+1)] for j in range(lv+1)]
 	ids = [[0 for i in range(lw+1)] for j in range(lv+1)]

@@ -33,16 +33,26 @@ in counts.'''
 	llist = list(lengths.keys())
 	llist.sort()
 
-	return {'var':    SNPcalc, 
-					'starts': [s for s,e in llist], 
-					'ends':   [e for s,e in llist],
-					'count': [lengths[k] for k in llist]}
+	return {
+		'var':    SNPcalc, 
+		'starts': [s for s,e in llist], 
+		'ends':   [e for s,e in llist],
+		'count': [lengths[k] for k in llist]
+	}
 
 def var(strain, fmt):
 	'''var(strain, fmt)
 Returns plotdata and metadata for plotting later on in the pipeline.'''
-	plotdata = {'nt': SaySNPs( options.DIRECTORY + fmt % {'strain': strain, 'type': 'nt'}),
-							'aa': SaySNPs( options.DIRECTORY + fmt % {'strain': strain, 'type': 'aa'})}
+	plotdata = {
+		'nt': SaySNPs(options.DIRECTORY + fmt % {
+			'strain': strain,
+			'type': 'nt'
+		}),
+		'aa': SaySNPs(options.DIRECTORY + fmt % {
+			'strain': strain,
+			'type': 'aa'
+		})
+	}
 	metadata = {'strain': strain, 'filename': strain + '.pdf'}
 	
 	return plotdata, metadata

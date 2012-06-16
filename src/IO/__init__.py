@@ -1,7 +1,9 @@
 from biotools.IO.manager import IOManager
 from biotools.sequence import Sequence, chop
 from biotools.annotation import Annotation
-import __builtin__
+try: import __builtin__
+except: import builtins as __builtin__
+
 
 def _io_methods():
 	def clean_alignment(x):
@@ -37,8 +39,6 @@ def _io_methods():
 				return False
 		return {'type': 'gff',
 		        'version': 3}
-
-	nil = lambda x: None
 
 	def whook_gff(fh):
 		fh.write('##gff-version 3\n')
@@ -156,7 +156,7 @@ def _io_methods():
 				return False
 		return {'type': 'clustalw'}
 
-	nil = lambda *x: None
+	nil = lambda *x: iter([])
 	def pop(fh):
 		try: fh.next()
 		except StopIteration: pass
@@ -179,6 +179,7 @@ def _io_methods():
 	                              'probe': probe_gff},
 		'__order__': ['fasta','fastq','clustalw','gff']
 	}
+
 
 class IOBase(object):
 	'''class IOBase(object)
@@ -234,7 +235,7 @@ Forces a file to be parsed as a particular format. By default, the values for fm
 				for key in ret:
 					object.__setattr__(self, key, ret[key])
 				return self
-			else: raise ValueError, "File cannot be parsed as type %s." % fmt
+			else: raise ValueError("File cannot be parsed as type %s." % fmt)
 		self.method = self.methods.default
 		return self
 
@@ -242,6 +243,7 @@ Forces a file to be parsed as a particular format. By default, the values for fm
 		'''close()
 Close the file handle.'''
 		self.handle.close()
+
 
 class Reader(IOBase):
 	'''class Reader(IOBase)
@@ -263,12 +265,14 @@ If n is provided, the next (up to) n entries are parsed and returned. Otherwise,
 		'''next()
 Reads a single entry in the file and returns it.'''
 		try: return self.read(1)[0]
-		except (StopIteration, ValueError):
+		except (StopIteration, ValueError, IndexError):
 			raise StopIteration
+
 
 class Writer(IOBase):
 	'''class Writer(IOBase)
 A class that wraps IOBase and restricts the ability to read.'''
+
 	def __init__(self, filename, mode='w'):
 		IOBase.__init__(self, filename, mode)
 		self.haswritten = False
