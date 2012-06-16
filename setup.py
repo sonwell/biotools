@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name="biotools",
-      version='1.1.16',
+      version='1.1.18',
       description="A bunch of bioinformatics utilities.",
       long_description="""Accompanies Bart, Rebecca, *et al.* High-throughput genomic sequencing of Cassava Bacterial Blight strains identifies conserved effectors to target for durable resistance. *PNAS Plus*.
 
@@ -21,6 +21,5 @@ Currently depends on `clustalw <ftp://ftp.ebi.ac.uk/pub/software/clustalw2/2.1/>
       classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
-        'License :: Free for non-commercial use',
         'Topic :: Scientific/Engineering :: Bio-Informatics'
       ])
