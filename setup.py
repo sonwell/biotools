@@ -21,6 +21,5 @@ Currently depends on `clustalw <ftp://ftp.ebi.ac.uk/pub/software/clustalw2/2.1/>
       classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
-        'License :: Free for non-commercial use',
         'Topic :: Scientific/Engineering :: Bio-Informatics'
       ])
