@@ -1,6 +1,7 @@
-Remove reliance on proprietary 'fastc' file format in biotools.analysis.predict; instead, it should be writing 'fasta' files and biotools.analysis.cluster should be concerned with making the initial clusters.
-
-Refactor biotools.analysis.cluster; make biotools.clustalw specifically for running clustalw
-
-We cannot resume prok-geneseek at the variance step, there needs to be a way to pair a nucleotide file with its amino acid counterpart without relying on interleaving the files (so that if you choose to resume at that point you can do e.g. prok-geneseek --no-predict --no-cluster --no-rename [other options] dir/*/*.fasta).
+We cannot resume prok-geneseek at the variance step, there needs to be a way to
+pair a nucleotide file with its amino acid counterpart without relying on 
+interleaving the files (so that if you choose to resume at that point you can 
+do e.g. 
+prok-geneseek --no-predict --no-cluster --no-rename [other options] \
+  dir/*/*.fasta.
 
