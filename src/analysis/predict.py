@@ -186,29 +186,24 @@ BLASTs database against sequences, and for those results that pass the length an
 	q_inputs.join()
 
 	seqs = {}
+	nuc_file = io.open(wd + pref + '.fasta', 'w')
 	while not q_outputs.empty():
 		try:
 			seq = q_outputs.get(False)
 			if seq.seq not in seqs:
 				seqs[seq.seq] = set()
 			seqs[seq.seq].add(seq)
+			nuc_file.write(seq)
 		except: break
+	nuc_file.close()
 
-	fh = io.open(wd + 'nt' + sep + pref + '.fastc', 'w')
-	ah = io.open(wd + 'aa' + sep + pref + '.fastc', 'w')
 	gh = io.open(wd + pref + '.gff3', 'w' )
-	names.append(wd + 'nt' + sep + pref + '.fastc')
+	names.append(wd + pref + '.fasta')
 
 	sa = sequ.annotation
 	for id in seqs:
-		fh.write(seqs[id])
-		c = set((translate(s), s) for s in seqs[id])
-		for t,s in c: t.name = s.name
-		ah.write(t for t, s in c)
 		gh.write(sa(seqs[id].copy().pop(), pref, 'gene', 
 			homologs=','.join(s.name for s in seqs[id])))
-	fh.close()
-	ah.close()
 	gh.close()
 
 def run(subject, query, prefix, names):

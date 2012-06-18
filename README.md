@@ -66,7 +66,7 @@ The class instance has a single other property, `headers`, which are the lines i
 
 `IOBase(self, name, mode)`\: opens the file `name` with mode `mode`. An `IOBase` will attempt to guess at the filetpye by 1. looking at the file extension and failing that, will 2. read the first few lines to determine the file type.
 
-Recognized file extension include fa, fsa, fas, fasta, fastc, fastq, clusalw, clustalw, aln, gff, gff3.
+Recognized file extension include fa, fsa, fas, fasta, fastq, clustal, clustalw, aln, gff, gff3.
 
 `chop(seq, length=70)`\: yields a chunk of a sequence of no more than `length` characters, it is meant to be used to print fasta files.
 
@@ -156,7 +156,7 @@ Modules used in Bart, Rebecca *et al.* _PNAS Plus_.
 
 `_run_clustal(q, clusters, direc)`\: takes a queue of clusters and a dictionary of all of the clusters from each of the inputs from `run` and generates fasta files to be used in a ClustalW alignment.
 
-`run(direc, inputs)`\: generates a set of clusters of sequences based on the presence of these sequences in each of the `inputs`, which are fastc files. Sequence IDs are obtained for each cluster in each input. The resulting clusters are those where for each input, each of the sequences in the cluster are also in the same input cluster or are absent from the input. That is,
+`run(direc, inputs)`\: generates a set of clusters of sequences based on the presence of these sequences in each of the `inputs`, which are fasta files. Sequence IDs are obtained for each cluster in each input. The resulting clusters are those where for each input, each of the sequences in the cluster are also in the same input cluster or are absent from the input. That is,
 
     >seq1 input1
     >seq2 input1
@@ -217,7 +217,7 @@ Globals:
 `biotools.analysis.renamer`
 ---------------------------
 
-`rename(direc, db)`\: searches through `direc` for files with a fastc extension and renames them according to user input. The user is given descriptions of the sequences contained within the fastc file from sequences in the `db` file.
+`rename(direc, db)`\: searches through `direc` for files with a fasta extension and renames them according to user input. The user is given descriptions of the sequences contained within the fastc file from sequences in the `db` file.
 
 `biotools.analysis.run`
 -----------------------

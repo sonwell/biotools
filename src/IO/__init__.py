@@ -77,19 +77,6 @@ def _io_methods():
 			finally:
 				fh.close()
 
-	def read_fastc(fh):
-		c = set()
-		for s in read_fasta(fh):
-			c.add(s)
-			if s.seq:
-				for r in c:
-					r.seq  = s.seq
-					r.type = s.type
-				yield c
-				c = set()
-		if c: yield c
-		raise StopIteration
-
 	def read_clustalw(fh):
 		seqs = {}
 		for line in fh:
@@ -113,11 +100,6 @@ def _io_methods():
 	def write_fastq(fh, s):
 		fh.write('@%s %s\n%s\n+\n%s\n' % (s.name, s.defline, s.seq, \
 		         ''.join(q+chr('A')-1 for q in s.qual)) + '\n')
-
-	def write_fastc(fh, c):
-		c = set(c)
-		fh.write('\n'.join('>%s %s' % (s.name, s.defline) for s in c) + \
-		         '\n' + '\n'.join(chop(c.pop().seq,70)) + '\n')
 
 	def probe_fasta(fh):
 		for line in fh:
@@ -144,9 +126,6 @@ def _io_methods():
 				return False
 		return {'type': 'fastq', 'phread': 64}
 
-	def probe_fastc(fh):
-		return {'type': 'fastc'}
-
 	def probe_clustalw(fh):
 		for line in fh:
 			st = line.strip()
@@ -168,16 +147,12 @@ def _io_methods():
 		'fastq': {'rhook': nil, 'read':  read_fastq,
 		          'whook': nil, 'write': write_fastq,
 		                        'probe': probe_fastq},
-		'fastc': {'rhook': nil, 'read':  read_fastc,
-		          'whook': nil, 'write': write_fastc,
-		                        'probe': probe_fastc},
 		'clustalw': {'rhook': pop, 'read': read_clustalw,
 		             'whook': nil, 'write': nil,
 		                           'probe': probe_clustalw},
 		'gff': {'rhook': nil,       'read': read_gff,
 	          'whook': whook_gff, 'write': write_gff,
 	                              'probe': probe_gff},
-		'__order__': ['fasta','fastq','clustalw','gff']
 	}
 
 
@@ -190,27 +165,34 @@ Generic IO class for sequence files.'''
 		'''IOBase(name, mode)
 Opens file name with mode mode. This function will attempt to guess at the filetype by 1. looking at the file extension and failing that, will 2. read the first few lines to determine the file type.
 
-Recoginized file extensions include fa, fsa, fas, fasta, fastc, fastq, clustalw, clustal, aln.'''
+Recoginized file extensions include fa, fsa, fas, fasta, fastq, clustalw, clustal, aln.'''
 
 		self.file   = name
 		self.handle = __builtin__.open(name, mode)
 		self.method = self.methods.default
 		self.type   = None
 
-		suffixes = {'fsa': 'fasta', 'fa':  'fasta',
-		            'fs': 'fasta',  'fas': 'fasta',
-		            'fna': 'fasta', 'fastc': 'fastc',
-		            'fasta': 'fasta', 'clustalw': 'clustalw',
-		            'clustal': 'clustalw', 'aln': 'clustalw',
-		            'fastq': 'fastq', 'gff': 'gff',
-		            'gff3': 'gff'}
+		self.suffixes = {
+			'fsa': 'fasta',
+			'fa':  'fasta',
+			'fs': 'fasta',
+			'fas': 'fasta',
+			'fna': 'fasta',
+			'fasta': 'fasta', 
+			'clustalw': 'clustalw',
+			'clustal': 'clustalw',
+			'aln': 'clustalw',
+			'fastq': 'fastq',
+			'gff': 'gff',
+			'gff3': 'gff'
+		}
 
 		p = name.rfind('.')
 		if p > -1:
 			ext = name[p+1:]
-			if ext in suffixes:
+			if ext in self.suffixes:
 				try:
-					self.format(suffixes[ext])
+					self.format(self.suffixes[ext])
 					return
 				except ValueError:
 					pass
@@ -226,7 +208,7 @@ Recoginized file extensions include fa, fsa, fas, fasta, fastc, fastq, clustalw,
 
 	def format(self, fmt):
 		'''format(fmt)
-Forces a file to be parsed as a particular format. By default, the values for fmt can be fasta, fastq, or fastc.'''
+Forces a file to be parsed as a particular format. By default, the values for fmt can be any recognized format.'''
 		if fmt in self.methods:
 			method = self.methods[fmt]
 			ret = method['probe'](__builtin__.open(self.file, 'r'))
