@@ -66,7 +66,7 @@ class Annotation(object):
                    "[%d:%d]" % (self.start, self.end))
         try:
             self.name = self.attr[name_token]
-        except:
+        except KeyError:
             Annotation.unknowns += 1
             self.name = "unknown %d" % Annotation.unknowns
         self.parent = None
@@ -92,7 +92,7 @@ class Annotation(object):
     def __eq__(self, other):
         try:
             return self.id == other.id
-        except:
+        except AttributeError:
             return False
 
     def __str__(self):

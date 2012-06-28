@@ -11,10 +11,10 @@ def chop(seq, length=70):
     while seq:
         try:
             piece, seq = seq[:length], seq[length:]
-        except:
+        except IndexError:
             piece, seq = seq, ''
         yield piece
-    raise StopIteration
+    raise StopIteration()
 
 
 class Sequence(object):
@@ -121,7 +121,7 @@ class Sequence(object):
     def __iter__(self):
         for i in xrange(len(self)):
             yield self.seq[i:i + 1]
-        raise StopIteration
+        raise StopIteration()
 
     def __hash__(self):
         return self.seq.__hash__()
@@ -149,7 +149,8 @@ def annotation(seq, source, type, **kwargs):
     '''
     annotation(sequence, source, type, **kwargs)
     Creates an Annotation object for the given sequence from a source
-    (e.g., "phytozome7.0") of a particular type (e.g., "gene").'''
+    (e.g., "phytozome7.0") of a particular type (e.g., "gene").
+    '''
     try:
         sname = source.name
     except AttributeError:

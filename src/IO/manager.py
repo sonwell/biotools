@@ -52,7 +52,7 @@ class IOManager(object):
     def get(self, key, default=None):
         try:
             return self.methods[key]
-        except:
+        except KeyError:
             return default or self.default
 
     def __setitem__(self, key, value):

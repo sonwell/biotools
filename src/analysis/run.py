@@ -15,7 +15,7 @@ def _run_genepredict(q, infile, names):
     while 1:
         try:
             strainf = q.get(False)
-        except:
+        except queue.Empty:
             break
         strain = strainf.split(os.sep)[-1]
         pos = strain.rfind('.')
@@ -56,5 +56,5 @@ if __name__ == "__main__":
     import sys
     try:
         run(sys.argv[1:])
-    except:
+    except IndexError:
         pass

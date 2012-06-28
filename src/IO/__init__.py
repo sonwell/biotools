@@ -3,7 +3,7 @@ from biotools.sequence import Sequence, chop
 from biotools.annotation import Annotation
 try:
     import __builtin__
-except:
+except ImportError:
     import builtins as __builtin__
 
 
@@ -27,7 +27,7 @@ def _io_methods():
         for line in fh:
             if line[0] != '#':
                 yield Annotation(*line.split('\t'))
-        raise StopIteration
+        raise StopIteration()
 
     def write_gff(fh, a):
         fh.write(str(a) + '\n')
@@ -62,7 +62,7 @@ def _io_methods():
         if name or seq:
             yield Sequence(name, seq, defline=defline)
         fh.close()
-        raise StopIteration
+        raise StopIteration()
 
     def read_fastq(fh):
         while 1:
@@ -75,8 +75,8 @@ def _io_methods():
                     fh.next()
                     qual = [ord(c) - self.phred for c in fh.next().strip()]
                     yield Sequence(name, seq, qual=qual, defline=defline)
-            except:
-                raise StopIteration
+            except StopIteration:
+                raise
             finally:
                 fh.close()
 
@@ -95,7 +95,7 @@ def _io_methods():
         for k in seqs:
             seq, start, end = clean_alignment(seqs[k])
             yield Sequence(k, seq, start=start, end=end)
-        raise StopIteration
+        raise StopIteration()
 
     def write_fasta(fh, s):
         fh.write('>%s %s\n' % (s.name, s.defline) +
@@ -294,7 +294,7 @@ class Reader(IOBase):
         try:
             return self.read(1)[0]
         except (StopIteration, ValueError, IndexError):
-            raise StopIteration
+            raise StopIteration()
 
 
 class Writer(IOBase):

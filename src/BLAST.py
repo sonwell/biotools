@@ -99,7 +99,7 @@ def run(db, sfile, mega_blast=False, **kwargs):
                 try:
                     ignore = open('/dev/null', 'w')
                     mbdb = 'makeblastdb'
-                except:
+                except IOError:
                     ignore = open('nul', 'w')
                     mbdb = 'makeblastdb.exe'
 
@@ -158,7 +158,7 @@ class Result(object):
     def __iter__(self):
         try:
             ipt = open(self.file, 'r')
-        except:
+        except IOError:
             ipt = self.file
         mode = 0
         headers = []
@@ -276,4 +276,4 @@ class Result(object):
                 subheaders[curr]['sequence'] += seq.upper()
 
         yield ra(subheaders)
-        raise StopIteration
+        raise StopIteration()

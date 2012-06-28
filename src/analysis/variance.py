@@ -48,8 +48,10 @@ def SaySNPs(input):
 
 
 def var(strain, fmt):
-    '''var(strain, fmt)
-Returns plotdata and metadata for plotting later on in the pipeline.'''
+    '''
+    var(strain, fmt)
+    Returns plotdata and metadata for plotting later on in the pipeline.
+    '''
     plotdata = {
         'nt': SaySNPs(options.DIRECTORY + fmt % {
             'strain': strain,

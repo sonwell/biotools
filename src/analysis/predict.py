@@ -7,12 +7,10 @@ import biotools.analysis.options as options
 from biotools.align import OptimalCTether as align
 from biotools.translate import *
 from biotools.complement import *
-
 try:
     import Queue as queue
-except:
+except ImportError:
     import queue
-
 import threading
 import random
 import sys
@@ -54,7 +52,7 @@ def ORFGenerator(sequ):
             if starts[i % 3] < stops[i % 3]:
                 starts[i % 3] = i
 
-    raise StopIteration
+    raise StopIteration()
 
 
 def _genepredict_target(qin, qout, orfs, subj):
@@ -164,7 +162,7 @@ def GeneFromBLAST(db, sequences, pref, names):
     for d in [options.DIRECTORY, wd, wd + 'nt' + sep, wd + 'aa' + sep]:
         try:
             os.mkdir(d)
-        except:
+        except OSError:
             pass
 
     subj = dict((s.name, s) for s in io.open(db, 'r'))
@@ -212,7 +210,7 @@ def GeneFromBLAST(db, sequences, pref, names):
                 seqs[seq.seq] = set()
             seqs[seq.seq].add(seq)
             nuc_file.write(seq)
-        except:
+        except queue.Empty:
             break
     nuc_file.close()
 

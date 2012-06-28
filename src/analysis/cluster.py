@@ -6,7 +6,7 @@ import biotools.clustal as clustal
 import biotools.analysis.options as options
 try:
     import Queue as queue
-except:
+except ImportError:
     import queue
 import hashlib
 import subprocess
@@ -32,18 +32,10 @@ def run(direc, inputs):
     ids = {}
 
     if direc:
-        try:
-            os.mkdir(direc)
-        except:
-            pass
-        finally:
+        for d in [direct, direc + 'nt' + sep, direct + 'aa' + sep]:
             try:
-                os.mkdir(direc + 'nt' + sep)
-            except:
-                pass
-            try:
-                os.mkdir(direc + 'aa' + sep)
-            except:
+                os.mkdir(direct)
+            except OSError:
                 pass
 
     for ipt in inputs:

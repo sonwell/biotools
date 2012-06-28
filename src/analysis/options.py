@@ -127,7 +127,7 @@ def parse(pargs):
         opts.directory += os.sep
     try:
         os.makedirs(opts.directory)
-    except:
+    except OSError:
         pass
 
     if '*' in opts.start:
@@ -163,6 +163,8 @@ def parse(pargs):
 
 
 def help():
-    '''help()
-Prints the usage.'''
+    '''
+    help()
+    Prints the usage.
+    '''
     parser.print_help()

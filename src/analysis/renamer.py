@@ -27,7 +27,7 @@ def rename(direc, db, files):
                 seqdb[id]
                 print "*", seqdb[id].name + ':', \
                       seqdb[id].defline.split('[')[0]
-        except:
+        except KeyError:
             print "* (none)"
             continue
         pre = raw_input("\033[33;1mWhat should we call this file " +
@@ -53,7 +53,7 @@ def rename(direc, db, files):
                         os.rename(nt_old + ".clustalw", nt_new + ".clustalw")
                         os.rename(aa_old + ".clustalw", aa_old + ".clustalw")
                         names.append(rpre)
-                    except:
+                    except OSError:
                         pass
                     break
     return names

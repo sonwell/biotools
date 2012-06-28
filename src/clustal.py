@@ -20,7 +20,7 @@ def run(infile, outfile, **kwargs):
 
         try:
             ignore = open('/dev/null', 'w')
-        except:
+        except IOError:
             ignore = open('nul', 'w')
 
         if seqtype == 'nucl':

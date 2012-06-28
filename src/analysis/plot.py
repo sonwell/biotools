@@ -23,7 +23,7 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True,
 
     try:
         os.mkdir(directory)
-    except:
+    except OSError:
         pass
 
     # plotting data

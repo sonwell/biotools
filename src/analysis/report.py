@@ -17,7 +17,7 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True,
     sep = os.sep
     try:
         os.mkdir(directory)
-    except:
+    except OSError:
         pass
 
     lowerbound = -upperbound / 6
