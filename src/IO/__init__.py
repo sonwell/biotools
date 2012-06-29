@@ -10,10 +10,11 @@ def get_methods():
     methods = {}
     nil = lambda *x: iter([])
     for module in [fasta, fastq, gff, clustal]:
-        modname = module.__name__
+        modname = module.__name__.split('.')[-1]
         methods[modname] = {}
         for method in ['read', 'write', 'rhook', 'whook', 'probe']:
             methods[modname][method] = module.__dict__.get(method, nil)
+    print methods
     return methods
 
 
