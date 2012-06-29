@@ -14,7 +14,6 @@ def get_methods():
         methods[modname] = {}
         for method in ['read', 'write', 'rhook', 'whook', 'probe']:
             methods[modname][method] = module.__dict__.get(method, nil)
-    print methods
     return methods
 
 
