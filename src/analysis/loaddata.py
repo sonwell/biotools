@@ -1,41 +1,49 @@
-_char = ""
-_pos = -1
+'''
+This is a pretty simple JSON-like parser. Specifically, it can load Python-like
+object, list, and other literals, i.e., the sort of stuff you'd get it you
+dumped the the string representation of some data into a file.
 
+The real difference is that you must specify a variable name, e.g.:
+    my_stuff = { ... }
+These variable names don't need to be on a newline or anything like that, you
+should be able to omit any and all whitespace. The result of a successful 
+parse is a dictionary:
+    {'my_stuff': { ... }}
+
+This function really only works for None, True, False, numbers, strings, 
+dictionaries, and lists.
+'''
 
 def parse(ipt):
-    global _char, _pos
-
-    _char = ""
-    _pos = -1
+    par = {'char': '', 'pos': -1}
     leng = 0
     val = ""
     ret = {}
 
     def advance(test=None):
-        global _pos, _char
-        curr = _char
+        curr = par['char']
         if test and test != curr:
             raise ValueError("Expected %s, saw %s." % (test, curr))
 
-        _pos += 1
-        if _pos < leng:
-            _char = val[_pos]
+        par['pos'] += 1
+        if par['pos'] < leng:
+            par['char'] = val[par['pos']]
         else:
-            _char = ''
+            par['char'] = ''
 
     def whitespace():
-        while _char and ord(_char) <= ord(' '):
+        while par['char'] and ord(par['char']) <= ord(' '):
             advance()
 
     def variable():
         whitespace()
-        start = _pos
+        start = par['pos']
         while \
-                ('0' <= _char <= '9') or \
-                ('A' <= _char <= 'Z') or \
-                ('a' <= _char <= 'z'):
+                ('0' <= par['char'] <= '9') or \
+                ('A' <= par['char'] <= 'Z') or \
+                ('a' <= par['char'] <= 'z'):
             advance()
-        stop = _pos
+        stop = par['pos']
         whitespace()
         advance('=')
 
@@ -43,37 +51,44 @@ def parse(ipt):
 
     def value():
         whitespace()
-        if _char == '{':
+        if par['char'] == '{':
             return dictionary()
-        if _char == '[':
+        if par['char'] == '[':
             return array()
-        if _char in ("'", '"'):
+        if par['char'] in ("'", '"'):
             return string()
-        if '0' <= _char <= '9' or _char == '-':
+        if '0' <= par['char'] <= '9' or par['char'] == '-':
             return number()
-        if _char == 'T':
+        at = par['pos']
+        if par['char'] == 'T':
             advance('r')
             advance('u')
             advance('e')
             return True
-        if _char == 'F':
+        if par['char'] == 'F':
             advance('a')
             advance('l')
             advance('s')
             advance('e')
             return False
-        raise ValueError("Unexpected value starting with %s." % _char)
+        if par['char'] == 'N':
+            advance('o')
+            advance('n')
+            advance('e')
+            return None
+        prefix = val[at:par['pos']]
+        raise ValueError("Unexpected value starting with %s." % prefix)
 
     def dictionary():
         ret = {}
         advance('{')
         whitespace()
-        while _char != '}':
+        while par['char'] != '}':
             s = value()
             advance(':')
             v = value()
             ret[s] = v
-            if _char == ',':
+            if par['char'] == ',':
                 advance(',')
             else:
                 break
@@ -85,9 +100,9 @@ def parse(ipt):
         ret = []
         advance('[')
         whitespace()
-        while _char != ']':
+        while par['char'] != ']':
             ret.append(value())
-            if _char == ',':
+            if par['char'] == ',':
                 advance(',')
             else:
                 break
@@ -97,20 +112,20 @@ def parse(ipt):
 
     def string():
         ret = ""
-        q = _char
+        q = par['char']
         advance(q)
-        while _char != q:
-            if _char == '\\':
+        while par['char'] != q:
+            if par['char'] == '\\':
                 advance('\\')
-                if _char == 'n':
+                if par['char'] == 'n':
                     ret += '\n'
-                elif _char == 't':
+                elif par['char'] == 't':
                     ret += '\t'
                 else:
-                    ret += _char
+                    ret += par['char']
                 advance()
                 continue
-            ret += _char
+            ret += par['char']
             advance()
         advance(q)
         whitespace()
@@ -118,26 +133,26 @@ def parse(ipt):
 
     def number():
         ret = ""
-        if _char == '-':
+        if par['char'] == '-':
             ret += '-'
             advance('-')
-        while '0' <= _char <= '9':
-            ret += _char
+        while '0' <= par['char'] <= '9':
+            ret += par['char']
             advance()
-        if _char == '.':
+        if par['char'] == '.':
             ret += '.'
             advance('.')
-            while '0' <= _char <= '9':
-                ret += _char
+            while '0' <= par['char'] <= '9':
+                ret += par['char']
                 advance()
-        if _char in ('e', 'E'):
-            ret += _char
+        if par['char'] in ('e', 'E'):
+            ret += par['char']
             advance()
-            if _char == '-':
+            if par['char'] == '-':
                 ret += '-'
                 advance('-')
-            while '0' <= _char <= '9':
-                ret += _char
+            while '0' <= par['char'] <= '9':
+                ret += par['char']
                 advance()
         whitespace()
         return float(ret)
@@ -147,7 +162,7 @@ def parse(ipt):
         leng += len(line)
 
     advance()
-    while _pos < leng:
+    while par['pos'] < leng:
         k, v = variable()
         ret[k] = v
 
