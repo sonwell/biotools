@@ -7,7 +7,7 @@ import sys
 import os
 try:
     import Queue as queue
-except:
+except ImportError:
     import queue
 
 
