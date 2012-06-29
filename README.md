@@ -1,10 +1,13 @@
 #`biotools`
-**Needs documentation**
 
-##`biotools.BLAST`
-**Needs documentation**
+A bunch of bioinformatics utilities.
 
-###`biotools.BLAST.Result(self, file)`
+###`biotools.BLAST`
+
+A module to manage BLAST databases and interface with the BLAST+ standalone
+program available from NCBI.
+
+####`biotools.BLAST.Result(self, file)`
 
 A class which take the raw output from BLAST and generates dictionaries
 from the data from BLAST. This data includes the alignment, percent
@@ -20,7 +23,7 @@ a for loop like so:
 The class instance has a single other property, `headers`, which are the
 lines in BLAST results before the BLAST hits (e.g., citation info, etc.).
 
-###`biotools.BLAST.run(db, sfile, mega_blast=False, **kwargs)`
+####`biotools.BLAST.run(db, sfile, mega_blast=False, **kwargs)`
 
 Takes a database and a query and runs the appropriate type of BLAST on 
 them. The database can be an existing BLAST database or a fasta/fastq 
@@ -33,8 +36,103 @@ Optional named arguments can currently only be `evalue`, `num_threads`,
 `gapopen`, or `gapextend`. The correspond to the BLAST options of the same 
 name.
 
-##`biotools.IO`
+###`biotools.align`
 **Needs documentation**
+
+####`biotools.align.OptimalCTether(reference, translation, gp=1, c=10)`
+
+This function will take two sequences: a `reference` sequence any other
+protein sequence (`translation`; usually, this is an open reading frame
+that has been translated). Needleman-Wunsch alignment will be performed
+and the substring of translation with the highest identity that begins
+with a start codon [default: `['ATG']`] is reported.
+
+This function returns a dictionary of relevent information from the
+alignment; specifically, the alignments itself [keys: `query`, `subject`],
+the score [key: `score`], the length of the alignment [key: `length`], the
+length of the substring of translation used [key: `sublength`], the number
+of identities [key: `identities`], the theoretical perfect score for that
+alignment [key: `perfect`], and the number of gaps [key: `gaps`].
+
+###`biotools.annotation`
+**Needs documentation**
+
+####`biotools.annotation.Annotation(self, ref, src, type, start, end, score, strand, phase, attr, name_token='ID', gff_token='=')`
+
+An object to help with reading and writing GFF files.
+
+####`biotools.annotation._parseAttrs(attr, token='=')`
+
+Creates a dictionary from the atrributes (9th column) of a gff file. By
+default, token is `=`, which is the separator used in gff version 3.
+
+In other words, `attr` `"a=b;c=d;"` and `token` `=` will yield the 
+dictionary `{'a':'b','c':'d'}`. The other separator (`;`) cannot be 
+changed.
+
+This function is not to be called on its own.
+
+###`biotools.blosum62`
+
+This is a pretty uninteresting file, the BLOSUM62 matrix I think I ripped from
+wikipedia, and just hacked it to pieces to make it do what I want. Lookup
+looks something like `blosum62['A','C']` and would give the value corresponding
+to the replacement of alanine with cystine.
+
+Basically, you don't need to be using this file, it is just to help in
+align.py.
+
+####`biotools.blosum62.blosum62(self)`
+**Needs documentation**
+
+###`biotools.clustal`
+**Needs documentation**
+
+####`biotools.clustal.run(infile, outfile, **kwargs)`
+**Needs documentation**
+
+###`biotools.complement`
+**Needs documentation**
+
+####`biotools.complement.complement(s)`
+
+Creates the complement of a sequence, which can then be reversed by using
+`seq[::-1]`, if it needs to be reversed. This function accepts either
+`Sequence`s or strings.
+
+###`biotools.sequence`
+**Needs documentation**
+
+####`biotools.sequence.Sequence(self, name, seq, **kwargs)`
+
+A wrapper class for sequences.
+
+#####`biotools.sequence.Sequence.upper(self)`
+**Needs documentation**
+
+####`biotools.sequence.annotation(seq, source, type, **kwargs)`
+
+Creates an `Annotation` object for the given sequence from a source
+(e.g., "phytozome7.0") of a particular type (e.g., "gene").
+
+####`biotools.sequence.chop(seq, length=70)`
+
+Yields a chunk of a sequence of no more than `length` characters,
+it is meant to be used to print fasta files.
+
+###`biotools.translate`
+**Needs documentation**
+
+####`biotools.translate.translate(sequence)`
+
+Translate a nucleotide using the standard genetic code. The sequence
+parameter can be either a string or a `Sequence` object. Stop codons are
+denoted with an asterisk (*).
+
+##`biotools.IO`
+
+A module for reading and writing to sequence and annotation files. Currently
+supported file types are: FASTA, FASTQ, CLUSTAL alignments, and GFF3 files.
 
 ###`biotools.IO.IOBase(self, name, mode)`
 
@@ -159,30 +257,14 @@ will default to the default method (which does nothing) if no truthy
 second parameter is passed.
 
 #####`biotools.IO.manager.IOManager.get(self, key, default=None)`
-**Needs documentation**
+
+Try to get a set of methods via format (e.g., 'fasta') or fall-back
+to the default methods (which do nothing).
 
 ###`biotools.IO.open(filename, mode='r')`
 
 Open a file for parsing or creation. Returns either a Reader or Writer
 object, depending on the open mode.
-
-##`biotools.align`
-**Needs documentation**
-
-###`biotools.align.OptimalCTether(reference, translation, gp=1, c=10)`
-
-This function will take two sequences: a `reference` sequence any other
-protein sequence (`translation`; usually, this is an open reading frame
-that has been translated). Needleman-Wunsch alignment will be performed
-and the substring of translation with the highest identity that begins
-with a start codon [default: `['ATG']`] is reported.
-
-This function returns a dictionary of relevent information from the
-alignment; specifically, the alignments itself [keys: `query`, `subject`],
-the score [key: `score`], the length of the alignment [key: `length`], the
-length of the substring of translation used [key: `sublength`], the number
-of identities [key: `identities`], the theoretical perfect score for that
-alignment [key: `perfect`], and the number of gaps [key: `gaps`].
 
 ##`biotools.analysis`
 **Needs documentation**
@@ -267,7 +349,7 @@ These variables are:
 ####`biotools.analysis.plot.models(starts, ends, counts, bound, ax, **kwargs)`
 **Needs documentation**
 
-####`biotools.analysis.plot.plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', upperbound=0.05, factor=21, fig=<matplotlib.figure.Figure object at 0x102237750>, **kwargs)`
+####`biotools.analysis.plot.plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', upperbound=0.05, factor=21, fig=<matplotlib.figure.Figure object at 0x1021f8750>, **kwargs)`
 **Needs documentation**
 
 ####`biotools.analysis.plot.report(ntvar, aavar, lnt, laa)`
@@ -316,7 +398,7 @@ rename the files generated by cluster.py with a little human interaction.
 ###`biotools.analysis.report`
 **Needs documentation**
 
-####`biotools.analysis.report.plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', upperbound=0.05, factor=21, fig=<matplotlib.figure.Figure object at 0x1022a0b50>, **kwargs)`
+####`biotools.analysis.report.plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', upperbound=0.05, factor=21, fig=<matplotlib.figure.Figure object at 0x102260b50>, **kwargs)`
 **Needs documentation**
 
 ####`biotools.analysis.report.report(plotdata, **kwargs)`
@@ -351,78 +433,4 @@ value in counts.
 ####`biotools.analysis.variance.var(strain, fmt)`
 
 Returns plot data and metadata for plotting later on in the pipeline.
-
-##`biotools.annotation`
-**Needs documentation**
-
-###`biotools.annotation.Annotation(self, ref, src, type, start, end, score, strand, phase, attr, name_token='ID', gff_token='=')`
-
-An object to help with reading and writing GFF files.
-
-###`biotools.annotation._parseAttrs(attr, token='=')`
-
-Creates a dictionary from the atrributes (9th column) of a gff file. By
-default, token is `=`, which is the separator used in gff version 3.
-
-In other words, `attr "a=b;c=d;"` and token `=` will yield the dictionary
-`{'a':'b','c':'d'}`. The other separator (`;`) cannot be changed.
-
-This function is not to be called on its own.
-
-##`biotools.blosum62`
-
-This is a pretty uninteresting file, the BLOSUM62 matrix I think I ripped from
-wikipedia, and just hacked it to pieces to make it do what I want. Lookup
-looks something like `blosum62['A','C']` and would give the value corresponding
-to the replacement of alanine with cystine.
-
-Basically, you don't need to be using this file, it is just to help in
-align.py.
-
-###`biotools.blosum62.blosum62(self)`
-**Needs documentation**
-
-##`biotools.clustal`
-**Needs documentation**
-
-###`biotools.clustal.run(infile, outfile, **kwargs)`
-**Needs documentation**
-
-##`biotools.complement`
-**Needs documentation**
-
-###`biotools.complement.complement(s)`
-
-Creates the complement of a sequence, which can then be reversed by using
-`seq[::-1]`, if it needs to be reversed. This function accepts either
-`Sequence`s or strings.
-
-##`biotools.sequence`
-**Needs documentation**
-
-###`biotools.sequence.Sequence(self, name, seq, **kwargs)`
-
-A wrapper class for sequences.
-
-####`biotools.sequence.Sequence.upper(self)`
-**Needs documentation**
-
-###`biotools.sequence.annotation(seq, source, type, **kwargs)`
-
-Creates an `Annotation` object for the given sequence from a source
-(e.g., "phytozome7.0") of a particular type (e.g., "gene").
-
-###`biotools.sequence.chop(seq, length=70)`
-
-Yields a chunk of a sequence of no more than `length` characters,
-it is meant to be used to print fasta files.
-
-##`biotools.translate`
-**Needs documentation**
-
-###`biotools.translate.translate(sequence)`
-
-Translate a nucleotide using the standard genetic code. The sequence
-parameter can be either a string or a `Sequence` object. Stop codons are
-denoted with an asterisk (*).
 
