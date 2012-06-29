@@ -1,183 +1,20 @@
+from biotools.IO import fasta, fastq, gff, clustal
 from biotools.IO.manager import IOManager
-from biotools.sequence import Sequence, chop
-from biotools.annotation import Annotation
 try:
     import __builtin__
 except ImportError:
     import builtins as __builtin__
 
 
-def _io_methods():
-    def clean_alignment(x):
-        i = 0
-        for c in x:
-            if c != "-":
-                break
-            i += 1
-
-        j = 0
-        for c in reversed(x):
-            if c != "-":
-                break
-            j += 1
-
-        return (' ' * i + x[(i or None):(-j or None)] + ' ' * j, i, len(x) - j)
-
-    def read_gff(fh):
-        for line in fh:
-            if line[0] != '#':
-                yield Annotation(*line.split('\t'))
-        raise StopIteration()
-
-    def write_gff(fh, a):
-        fh.write(str(a) + '\n')
-
-    def probe_gff(fh):
-        for line in fh:
-            line = line.strip()
-            if line:
-                bits = line.split()
-                if bits[0] == '##gff-version':
-                    return {'type': 'gff', 'version': float(bits[1])}
-                return False
-        return {'type': 'gff', 'version': 3}
-
-    def whook_gff(fh):
-        fh.write('##gff-version 3\n')
-
-    def read_fasta(fh):
-        name, defline, seq = '', '', ''
-        for line in fh:
-            line = line.strip()
-            if not line:
-                continue
-            if line[0] == '>':
-                if name or seq:
-                    yield Sequence(name, seq, defline=defline)
-                seq = ''
-                name = line[1:].split()[0]
-                defline = line[1 + len(name):].strip()
-                continue
-            seq += line
-        if name or seq:
-            yield Sequence(name, seq, defline=defline)
-        fh.close()
-        raise StopIteration()
-
-    def read_fastq(fh):
-        while 1:
-            try:
-                line = fh.next().strip()
-                if line[0] == '@':
-                    name = line[1:].split()[0]
-                    defline = line[1 + len(name):].strip()
-                    seq = f.next().strip()
-                    fh.next()
-                    qual = [ord(c) - self.phred for c in fh.next().strip()]
-                    yield Sequence(name, seq, qual=qual, defline=defline)
-            except StopIteration:
-                raise
-            finally:
-                fh.close()
-
-    def read_clustalw(fh):
-        seqs = {}
-        for line in fh:
-            st = line.strip()
-            if st:
-                bits = st.split()
-                if len(bits) != 2:
-                    continue
-                if bits[0] not in seqs:
-                    seqs[bits[0]] = ''
-                seqs[bits[0]] += bits[1]
-
-        for k in seqs:
-            seq, start, end = clean_alignment(seqs[k])
-            yield Sequence(k, seq, start=start, end=end)
-        raise StopIteration()
-
-    def write_fasta(fh, s):
-        fh.write('>%s %s\n' % (s.name, s.defline) +
-                 '\n'.join(chop(s.seq, 70)) + '\n')
-
-    def write_fastq(fh, s):
-        fh.write('@%s %s\n%s\n+\n%s\n' % (s.name, s.defline, s.seq,
-                 ''.join(q + chr('A') - 1 for q in s.qual)) + '\n')
-
-    def probe_fasta(fh):
-        for line in fh:
-            st = line.strip()
-            if st:
-                fh.close()
-                if st[0] == '>':
-                    return {'type': 'fasta'}
-                return False
-        fh.close()
-        return {'type': 'fasta'}
-
-    def probe_fastq(fh):
-        for line in fh:
-            st = line.strip()
-            if st:
-                fh.close()
-                if st[0] == '@':
-                    fh.next()
-                    fh.next()
-                    qual = [ord(c) for c in fh.next().strip()]
-                    phred = 32 if min(qual) < ord('A') else 64
-                    qual = [q - phred for q in qual]
-                    return {'type': 'fastq', 'phred': phred}
-                return False
-        return {'type': 'fastq', 'phread': 64}
-
-    def probe_clustalw(fh):
-        for line in fh:
-            st = line.strip()
-            if st:
-                if st.split()[0].lower() == 'CLUSTAL':
-                    return {'type': 'clustalw'}
-                return False
-        return {'type': 'clustalw'}
-
+def get_methods():
+    methods = {}
     nil = lambda *x: iter([])
-
-    def pop(fh):
-        try:
-            fh.next()
-        except StopIteration:
-            pass
-
-    return {
-        'fasta': {
-            'rhook': nil,
-            'read': read_fasta,
-            'whook': nil,
-            'write': write_fasta,
-            'probe': probe_fasta
-        },
-        'fastq': {
-            'rhook': nil,
-            'read': read_fastq,
-            'whook': nil,
-            'write': write_fastq,
-            'probe': probe_fastq
-        },
-        'clustalw': {
-            'rhook': pop,
-            'read': read_clustalw,
-            'whook': nil,
-            'write': nil,
-            'probe': probe_clustalw
-        },
-        'gff': {
-            'rhook': nil,
-            'read': read_gff,
-            'whook': whook_gff,
-            'write': write_gff,
-            'probe': probe_gff
-        },
-    }
+    for module in [fasta, fastq, gff, clustal]:
+        modname = module.__name__
+        methods[modname] = {}
+        for method in ['read', 'write', 'rhook', 'whook', 'probe']:
+            methods[modname][method] = module.__dict__.get(method, nil)
+    return methods
 
 
 class IOBase(object):
@@ -185,7 +22,7 @@ class IOBase(object):
     class IOBase(object)
     Generic IO class for sequence files.
     '''
-    methods = IOManager(_io_methods())
+    methods = IOManager(get_methods())
 
     def __init__(self, name, mode):
         '''
