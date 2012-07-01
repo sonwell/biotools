@@ -1,3 +1,9 @@
+
+'''
+A module for reading and writing to sequence and annotation files. Currently
+supported file types are: FASTA, FASTQ, CLUSTAL alignments, and GFF3 files.
+'''
+
 from biotools.IO import fasta, fastq, gff, clustal
 from biotools.IO.manager import IOManager
 try:
@@ -19,14 +25,12 @@ def get_methods():
 
 class IOBase(object):
     '''
-    class IOBase(object)
     Generic IO class for sequence files.
     '''
     methods = IOManager(get_methods())
 
     def __init__(self, name, mode):
         '''
-        IOBase(name, mode)
         Opens file name with mode mode. This function will attempt to guess at
         the filetype by 1. looking at the file extension and failing that,
         will 2. read the first few lines to determine the file type.
@@ -76,7 +80,6 @@ class IOBase(object):
 
     def format(self, fmt):
         '''
-        format(fmt)
         Forces a file to be parsed as a particular format. By default, the
         values for fmt can be any recognized format.
         '''
@@ -95,7 +98,6 @@ class IOBase(object):
 
     def close(self):
         '''
-        close()
         Close the file handle.
         '''
         self.handle.close()
@@ -103,7 +105,6 @@ class IOBase(object):
 
 class Reader(IOBase):
     '''
-    class Reader(IOBase)
     A class that wraps IOBase and restricts the ability to write.
     '''
     def __init__(self, filename, mode='r'):
@@ -111,9 +112,8 @@ class Reader(IOBase):
 
     def read(self, n=None):
         '''
-        read(n=None)
-        If n is provided, the next (up to) n entries are parsed and returned.
-        Otherwise, all remaining entries are parsed and returned.
+        If `n` is provided, the next (up to) `n` entries are parsed and 
+        returned. Otherwise, all remaining entries are parsed and returned.
         '''
         if n is None:
             return [s for s in self]
@@ -125,7 +125,6 @@ class Reader(IOBase):
 
     def next(self):
         '''
-        next()
         Reads a single entry in the file and returns it.
         '''
         try:
@@ -136,7 +135,6 @@ class Reader(IOBase):
 
 class Writer(IOBase):
     '''
-    class Writer(IOBase)
     A class that wraps IOBase and restricts the ability to read.
     '''
 
@@ -146,7 +144,6 @@ class Writer(IOBase):
 
     def write(self, sequence):
         '''
-        write(sequence):
         Writes sequence as the correct format to the file.
         '''
         if not self.haswritten:
@@ -157,7 +154,6 @@ class Writer(IOBase):
 
 def open(filename, mode='r'):
     '''
-    open(filename, mode='r')
     Open a file for parsing or creation. Returns either a Reader or Writer
     object, depending on the open mode.
     '''

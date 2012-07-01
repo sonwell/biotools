@@ -1,7 +1,7 @@
 '''
 This is a pretty uninteresting file, the BLOSUM62 matrix I think I ripped from
 wikipedia, and just hacked it to pieces to make it do what I want. Lookup
-looks something like blosum62['A','C'] and would give the value corresponding
+looks something like `blosum62['A','C']` and would give the value corresponding
 to the replacement of alanine with cystine.
 
 Basically, you don't need to be using this file, it is just to help in

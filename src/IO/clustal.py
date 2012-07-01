@@ -1,21 +1,24 @@
+'''
+Methods for manipulating clustalw alignment files.
+'''
+
 from biotools.sequence import Sequence
 
 
-def clean_alignment(x):
-    i = 0
-    for c in x:
-        if c != "-":
-            break
-        i += 1
-    j = 0
-    for c in reversed(x):
-        if c != "-":
-            break
-        j += 1
-    return (' ' * i + x[(i or None):(-j or None)] + ' ' * j, i, len(x) - j)
-
-
 def read(fh):
+    def clean_alignment(x):
+        i = 0
+        for c in x:
+            if c != "-":
+                break
+            i += 1
+        j = 0
+        for c in reversed(x):
+            if c != "-":
+                break
+            j += 1
+        return (' ' * i + x[(i or None):(-j or None)] + ' ' * j, i, len(x) - j)
+
     seqs = {}
     for line in fh:
         st = line.strip()

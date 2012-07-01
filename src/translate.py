@@ -33,23 +33,23 @@ _gencode = {
     'UGC': 'C', 'UGU': 'C', 'UGA': '*', 'UGG': 'W'}
 
 
-def translate(x):
+def translate(sequence):
     '''
-    translate( sequence )
     Translate a nucleotide using the standard genetic code. The sequence
-    parameter can be either a string or a Sequence object. Stop codons are
+    parameter can be either a string or a `Sequence` object. Stop codons are
     denoted with an asterisk (*).
     '''
 
     try:
-        value = ''.join(_gencode.get(x.seq[i:i + 3].upper(), 'X')
-                        for i in xrange(0, len(x) / 3 * 3, 3))
-        return x.__class__("translate(%s)" % x.name, value,
-                           original=x.original, type='prot', defline=x.defline)
+        value = ''.join(_gencode.get(sequence.seq[i:i + 3].upper(), 'X')
+                        for i in xrange(0, int(len(sequence) / 3) * 3, 3))
+        return sequence.__class__("translate(%s)" % sequence.name, value,
+                                  original=sequence.original, type='prot',
+                                  defline=sequence.defline)
     except AttributeError:
-        value = ''.join(_gencode.get(x[i:i + 3].upper(), 'X')
-                        for i in xrange(0, len(x) / 3 * 3, 3))
-        return x.__class__(value)
+        value = ''.join(_gencode.get(sequence[i:i + 3].upper(), 'X')
+                        for i in xrange(0, int(len(sequence) / 3) * 3, 3))
+        return sequence.__class__(value)
 
 
 if __name__ == '__main__':

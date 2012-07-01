@@ -1,4 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
+'''
+This module is used to align sequences. Currently, there is only a single
+alignment algorithm implementented; it is a hybrid between Needleman-Wunsch
+and Smith-Waterman and is used to find the subsequence within a larger sequence
+that best aligns to a reference.
+'''
+
 from biotools.blosum62 import blosum62
 from biotools.translate import translate
 import biotools.analysis.options as options
@@ -9,19 +17,18 @@ bl = blosum62()
 
 def OptimalCTether(reference, translation, gp=1, c=10):
     '''
-    OptimalCTether(reference, translation)
-    This function will take two sequences: a reference sequence any other
-    protein sequence (translation; usually, this is an open reading frame
+    This function will take two sequences: a `reference` sequence and  another
+    protein sequence (`translation`; usually, this is an open reading frame
     that has been translated). Needleman-Wunsch alignment will be performed
     and the substring of translation with the highest identity that begins
-    with a start codon [default: ATG] is reported.
+    with a start codon [default: `['ATG']`] is reported.
 
     This function returns a dictionary of relevent information from the
-    alignment; specifically, the alignments itself [keys: query, subject],
-    the score [key: score], the length of the alignment [key: length], the
-    length of the substring of translation used [key: sublength], the number
-    of identities [key: identities], the theoretical perfect score for that
-    alignment [key: perfect], and the number of gaps [key: gaps].
+    alignment; specifically, the alignments itself [keys: `query`, `subject`],
+    the score [key: `score`], the length of the alignment [key: `length`], the
+    length of the substring of translation used [key: `sublength`], the number
+    of identities [key: `identities`], the theoretical perfect score for that
+    alignment [key: `perfect`], and the number of gaps [key: `gaps`].
     '''
 
     starts = set(translate(s) for s in options.START_CODONS)

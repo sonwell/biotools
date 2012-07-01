@@ -99,21 +99,20 @@ def debug(msg):
 
 def parse(pargs):
     '''
-    parse(pargs)
-    Parses pargs and sets the various variables to be accessible to other
+    Parses `pargs` and sets global variables to be accessible to other
     modules.
 
     These variables are:
-    * LENGTH_ERR
-    * MIN_IDENTITY
-    * MAX_EVALUE
-    * NUM_THREADS
-    * NUM_PROCESSES
-    * START_CODONS
-    * START_CODONS
-    * DIRECTORY
-    * PLOTTER
-    * args
+    * `LENGTH_ERR`
+    * `MIN_IDENTITY`
+    * `MAX_EVALUE`
+    * `NUM_THREADS`
+    * `NUM_PROCESSES`
+    * `START_CODONS`
+    * `START_CODONS`
+    * `DIRECTORY`
+    * `PLOTTER`
+    * `args`
     '''
     global \
         LENGTH_ERR, MIN_IDENTITY, MAX_EVALUE, MIN_ORFLEN, \
@@ -164,7 +163,6 @@ def parse(pargs):
 
 def help():
     '''
-    help()
     Prints the usage.
     '''
     parser.print_help()

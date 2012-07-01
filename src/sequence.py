@@ -3,8 +3,7 @@ from biotools.annotation import Annotation
 
 def chop(seq, length=70):
     '''
-    chop(sequence, length=70)
-    Yields a chunk of a sequence of no more than length characters,
+    Yields a chunk of a sequence of no more than `length` characters,
     it is meant to be used to print fasta files.
     '''
 
@@ -19,32 +18,30 @@ def chop(seq, length=70):
 
 class Sequence(object):
     '''
-    class Sequence
     A wrapper class for sequences.
     '''
 
     def __init__(self, name, seq, **kwargs):
         '''
-        Sequence( name, sequence, ... )
         Instantiates a Sequence object with a given sequence. Some other
-        useful parameters that the Sequence constructor can handle are:
-            * qual => the quality scores (an array of integers) of the
+        useful parameters that the `Sequence` constructor can handle are:
+            * `qual` => the quality scores (an array of integers) of the
                 sequence,
-            * type => the type of the sequence, either prot or nucl,
-            * start => the starting position of the sequence within a
+            * `type` => the type of the sequence, either prot or nucl,
+            * `start` => the starting position of the sequence within a
                 supersequence,
-            * end => the ending position of the sequnece within a
+            * `end` => the ending position of the sequnece within a
                 supersequence,
-            * step => the 'step' of the sequence, usually +1 for top-strand
+            * `step` => the 'step' of the sequence, usually +1 for top-strand
                 sequences, and -1 for bottom-strand sequences, but can handle
                 other values as well,
-            * original => the original Sequence object from which this one
+            * `original` => the original `Sequence` object from which this one
                 derives,
-            * defline => the definition line for this sequnce from a fasta
+            * `defline` => the definition line for this sequnce from a fasta
                 file.
         If one of these are not given, they will default to the most logical
         value that can be determined from the other values and sequence (e.g.,
-        if end < start, then step is probably -1).
+        if `end < start`, then `step` is probably -1).
         '''
 
         self.name = name
@@ -147,8 +144,7 @@ class Sequence(object):
 
 def annotation(seq, source, type, **kwargs):
     '''
-    annotation(sequence, source, type, **kwargs)
-    Creates an Annotation object for the given sequence from a source
+    Creates an `Annotation` object for the given sequence from a source
     (e.g., "phytozome7.0") of a particular type (e.g., "gene").
     '''
     try:

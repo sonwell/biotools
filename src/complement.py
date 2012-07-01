@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
 
 _ref = {
@@ -9,10 +9,9 @@ _ref = {
 
 def complement(s):
     '''
-    complement( sequence )
     Creates the complement of a sequence, which can then be reversed by using
-    seq[::-1], if it needs to be reversed. This function accepts either
-    Sequences or strings.
+    `seq[::-1]`, if it needs to be reversed. This function accepts either
+    `Sequence`s or strings.
     '''
 
     if set(s) - set('ATUCGNRY'):

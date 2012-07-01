@@ -1,4 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
+'''
+A module to manage BLAST databases and interface with the BLAST+ standalone
+program available from NCBI.
+'''
+
 import biotools.IO as io
 import subprocess
 import os
@@ -8,16 +14,16 @@ import shutil
 
 def run(db, sfile, mega_blast=False, **kwargs):
     '''
-    BLAST(database, query, **params)
-    This function takes a database and a query and runs the appropriate type
-    of BLAST on them. The database can be an existing BLAST database or a
-    fasta/fastq file. If it is a sequence file, this function will look in
-    the places where BLAST would look for an existing database created from
-    that file and use that instead. If there is no such database, this
-    function will make one for you and then use the newly created database
-    with BLAST.
+    Takes a database and a query and runs the appropriate type of BLAST on 
+    them. The database can be an existing BLAST database or a fasta/fastq 
+    file. If it is a sequence file, this function will look in the places 
+    where BLAST would look for an existing database created from that file and 
+    use that instead. If there is no such database, this function will make 
+    one for you and then use the newly created database with BLAST.
 
-    Optional named arguments can currently only be evalue or num_threads.
+    Optional named arguments can currently only be `evalue`, `num_threads`, 
+    `gapopen`, or `gapextend`. The correspond to the BLAST options of the same 
+    name.
     '''
 
     sep = os.sep
@@ -69,53 +75,52 @@ def run(db, sfile, mega_blast=False, **kwargs):
     if not dbtype:
         odb = db
         pos = db.rfind(".")
-        if pos >= 0 and db[pos + 1:] in ["txt", "fasta", "fa", "fas"]:
-            for seq in io.open(db, 'r'):
-                dbtype = seq.type
-                break
-            if not dbtype:
-                raise IOError("Database not found: " + odb)
+        for seq in io.open(db, 'r'):
+            dbtype = seq.type
+            break
+        if not dbtype:
+            raise IOError("Database not found: " + odb)
 
-            ndb = None
-            sp = db.rfind(sep)
-            if sp > -1:
-                dbdir, db = db[:sp], db[sp + 1:pos]
-            else:
-                dbdir, db = '.', db[:pos]
-
-            for file in os.listdir(dbdir):
-                dpos = file.rfind('.')
-                if dpos >= 0 and file[dpos + 1:] == dbtype[0] + 'in':
-                    fh = open(dbdir + sep + file, 'r')
-                    c = ord(fh.read(12)[-1])
-                    fname = fh.read(c)
-                    if fname[0] in ("'", '"'):
-                        fname = fname[1:-1]
-                    if fname.endswith(odb):
-                        ndb = dbdir + sep + file[:dpos]
-                        break
-            if not ndb:
-                ndb = '_'.join(db.split())
-                try:
-                    ignore = open('/dev/null', 'w')
-                    mbdb = 'makeblastdb'
-                except IOError:
-                    ignore = open('nul', 'w')
-                    mbdb = 'makeblastdb.exe'
-
-                subprocess.call([mbdb, "-in", '"%s"' % odb, "-out", ndb,
-                                "-dbtype", dbtype], stdout=ignore)
-                try:
-                    for suff in ['in', 'hr', 'sq']:
-                        name = ndb + '.' + dbtype[0] + suff
-                        shutil.copyfile(name, dbdir + sep + name)
-                except shutil.Error:
-                    pass
-                db = dbdir + sep + ndb
-            else:
-                db = ndb
+        ndb = None
+        sp = db.rfind(sep)
+        if sp > -1:
+            dbdir, db = db[:sp], db[sp + 1:pos]
         else:
-            raise IOError("Database not found: " + db)
+            dbdir, db = '.', db[:pos]
+
+        for file in os.listdir(dbdir):
+            dpos = file.rfind('.')
+            if dpos >= 0 and file[dpos + 1:] == dbtype[0] + 'in':
+                fh = open(dbdir + sep + file, 'r')
+                c = ord(fh.read(12)[-1])
+                fname = fh.read(c)
+                if fname[0] in ("'", '"'):
+                    fname = fname[1:-1]
+                if fname.endswith(odb):
+                    ndb = dbdir + sep + file[:dpos]
+                    break
+        if not ndb:
+            ndb = '_'.join(db.split())
+            try:
+                ignore = open('/dev/null', 'w')
+                mbdb = 'makeblastdb'
+            except IOError:
+                ignore = open('nul', 'w')
+                mbdb = 'makeblastdb.exe'
+
+            subprocess.call([mbdb, "-in", '"%s"' % odb, "-out", ndb,
+                            "-dbtype", dbtype], stdout=ignore)
+            try:
+                for suff in ['in', 'hr', 'sq']:
+                    name = ndb + '.' + dbtype[0] + suff
+                    shutil.copyfile(name, dbdir + sep + name)
+            except shutil.Error:
+                pass
+            db = dbdir + sep + ndb
+        else:
+            db = ndb
+    else:
+        raise IOError("Database not found: " + db)
     allowed = set(["evalue", "gapopen", "gapextend", "num_threads"]) & \
         set(kwargs.keys())
     cmd = cmds[qtype][dbtype]
@@ -138,16 +143,18 @@ def run(db, sfile, mega_blast=False, **kwargs):
 class Result(object):
 
     '''
-    Class BLASTResult
     A class which take the raw output from BLAST and generates dictionaries
     from the data from BLAST. This data includes the alignment, percent
     identity, gaps, e-value, score, length of subject, length of query, and
-    start and stop positions for both sequences.
+    start and stop positions for both sequences. This class should be used in 
+    a for loop like so:
 
-    This class should be used in a for loop like so:
-        for res in Result(file_or_data): pass
+    ```python
+        for res in Result(file_or_data):
+            pass
+    ```
 
-    The class instance has a single other property, headers, which are the
+    The class instance has a single other property, `headers`, which are the
     lines in BLAST results before the BLAST hits (e.g., citation info, etc.).
     '''
 
@@ -158,7 +165,7 @@ class Result(object):
     def __iter__(self):
         try:
             ipt = open(self.file, 'r')
-        except IOError:
+        except (IOError, TypeError):
             ipt = self.file
         mode = 0
         headers = []

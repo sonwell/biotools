@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import biotools.IO as io
 import subprocess
 import os

@@ -2,6 +2,38 @@
 
 A bunch of bioinformatics utilities.
 
+###`biotools.align`
+
+This module is used to align sequences. Currently, there is only a single
+alignment algorithm implementented; it is a hybrid between Needleman-Wunsch
+and Smith-Waterman and is used to find the subsequence within a larger sequence
+that best aligns to a reference.
+
+####`biotools.align.OptimalCTether(reference, translation, gp=1, c=10)`
+
+This function will take two sequences: a `reference` sequence and  another
+protein sequence (`translation`; usually, this is an open reading frame
+that has been translated). Needleman-Wunsch alignment will be performed
+and the substring of translation with the highest identity that begins
+with a start codon [default: `['ATG']`] is reported.
+
+This function returns a dictionary of relevent information from the
+alignment; specifically, the alignments itself [keys: `query`, `subject`],
+the score [key: `score`], the length of the alignment [key: `length`], the
+length of the substring of translation used [key: `sublength`], the number
+of identities [key: `identities`], the theoretical perfect score for that
+alignment [key: `perfect`], and the number of gaps [key: `gaps`].
+
+###`biotools.annotation`
+
+This module is used to create annotation files (currently, only GFF files).
+The annotations can be used to create a heirarchy among the annotations (e.g.,
+genes contain exons, introns, ... etc.).
+
+####`biotools.annotation.Annotation(self, ref, src, type, start, end, score, strand, phase, attr, name_token='ID', gff_token='=')`
+
+An object to help with reading and writing GFF files.
+
 ###`biotools.BLAST`
 
 A module to manage BLAST databases and interface with the BLAST+ standalone
@@ -36,42 +68,6 @@ Optional named arguments can currently only be `evalue`, `num_threads`,
 `gapopen`, or `gapextend`. The correspond to the BLAST options of the same 
 name.
 
-###`biotools.align`
-**Needs documentation**
-
-####`biotools.align.OptimalCTether(reference, translation, gp=1, c=10)`
-
-This function will take two sequences: a `reference` sequence any other
-protein sequence (`translation`; usually, this is an open reading frame
-that has been translated). Needleman-Wunsch alignment will be performed
-and the substring of translation with the highest identity that begins
-with a start codon [default: `['ATG']`] is reported.
-
-This function returns a dictionary of relevent information from the
-alignment; specifically, the alignments itself [keys: `query`, `subject`],
-the score [key: `score`], the length of the alignment [key: `length`], the
-length of the substring of translation used [key: `sublength`], the number
-of identities [key: `identities`], the theoretical perfect score for that
-alignment [key: `perfect`], and the number of gaps [key: `gaps`].
-
-###`biotools.annotation`
-**Needs documentation**
-
-####`biotools.annotation.Annotation(self, ref, src, type, start, end, score, strand, phase, attr, name_token='ID', gff_token='=')`
-
-An object to help with reading and writing GFF files.
-
-####`biotools.annotation._parseAttrs(attr, token='=')`
-
-Creates a dictionary from the atrributes (9th column) of a gff file. By
-default, token is `=`, which is the separator used in gff version 3.
-
-In other words, `attr` `"a=b;c=d;"` and `token` `=` will yield the 
-dictionary `{'a':'b','c':'d'}`. The other separator (`;`) cannot be 
-changed.
-
-This function is not to be called on its own.
-
 ###`biotools.blosum62`
 
 This is a pretty uninteresting file, the BLOSUM62 matrix I think I ripped from
@@ -83,15 +79,19 @@ Basically, you don't need to be using this file, it is just to help in
 align.py.
 
 ####`biotools.blosum62.blosum62(self)`
+
 **Needs documentation**
 
 ###`biotools.clustal`
+
 **Needs documentation**
 
 ####`biotools.clustal.run(infile, outfile, **kwargs)`
+
 **Needs documentation**
 
 ###`biotools.complement`
+
 **Needs documentation**
 
 ####`biotools.complement.complement(s)`
@@ -101,13 +101,7 @@ Creates the complement of a sequence, which can then be reversed by using
 `Sequence`s or strings.
 
 ###`biotools.sequence`
-**Needs documentation**
 
-####`biotools.sequence.Sequence(self, name, seq, **kwargs)`
-
-A wrapper class for sequences.
-
-#####`biotools.sequence.Sequence.upper(self)`
 **Needs documentation**
 
 ####`biotools.sequence.annotation(seq, source, type, **kwargs)`
@@ -120,7 +114,16 @@ Creates an `Annotation` object for the given sequence from a source
 Yields a chunk of a sequence of no more than `length` characters,
 it is meant to be used to print fasta files.
 
+####`biotools.sequence.Sequence(self, name, seq, **kwargs)`
+
+A wrapper class for sequences.
+
+#####`biotools.sequence.Sequence.upper(self)`
+
+**Needs documentation**
+
 ###`biotools.translate`
+
 **Needs documentation**
 
 ####`biotools.translate.translate(sequence)`
@@ -129,10 +132,293 @@ Translate a nucleotide using the standard genetic code. The sequence
 parameter can be either a string or a `Sequence` object. Stop codons are
 denoted with an asterisk (*).
 
+##`biotools.analysis`
+
+**Needs documentation**
+
+###`biotools.analysis.cluster`
+
+**Needs documentation**
+
+####`biotools.analysis.cluster.run(direc, inputs)`
+
+Takes a collection of files generated by gene prediction, creates clusters
+based off of the genes that have homology to those predicted genes, and
+creates new fasta files in the clusters sub directory under the given
+directory and separated according to whether they are nucleotide or amino
+acid sequnces. These new fasta files are then used to create clustalw
+alignments of the genes if more than 1 sequence exists in the fasta file.
+
+###`biotools.analysis.loaddata`
+
+This is a pretty simple JSON-like parser. Specifically, it can load Python-like
+object, list, and other literals, i.e., the sort of stuff you'd get it you
+dumped the the string representation of some data into a file.
+
+The real difference is that you must specify a variable name, e.g.:
+
+```python
+my_stuff = { ... }
+```
+
+These variable names don't need to be on a newline or anything like that, you
+should be able to omit any and all whitespace. The result of a successful 
+parse is a dictionary:
+
+```python
+{'my_stuff': { ... }}
+```
+
+This function really only works for `None`, `True`, `False`, numbers, strings, 
+dictionaries, and lists.
+
+####`biotools.analysis.loaddata.parse(ipt)`
+
+**Needs documentation**
+
+###`biotools.analysis.options`
+
+**Needs documentation**
+
+####`biotools.analysis.options.debug(msg)`
+
+**Needs documentation**
+
+####`biotools.analysis.options.help()`
+
+Prints the usage.
+
+####`biotools.analysis.options.parse(pargs)`
+
+Parses `pargs` and sets global variables to be accessible to other
+modules.
+
+These variables are:
+* `LENGTH_ERR`
+* `MIN_IDENTITY`
+* `MAX_EVALUE`
+* `NUM_THREADS`
+* `NUM_PROCESSES`
+* `START_CODONS`
+* `START_CODONS`
+* `DIRECTORY`
+* `PLOTTER`
+* `args`
+
+###`biotools.analysis.plot`
+
+**Needs documentation**
+
+####`biotools.analysis.plot.axes(bottom, side, bound, fig, **kwargs)`
+
+**Needs documentation**
+
+####`biotools.analysis.plot.draw(x, y, ax, color, **kwargs)`
+
+**Needs documentation**
+
+####`biotools.analysis.plot.models(starts, ends, counts, bound, ax, **kwargs)`
+
+**Needs documentation**
+
+####`biotools.analysis.plot.plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', upperbound=0.05, factor=21, fig=<matplotlib.figure.Figure object at 0x1021fa650>, **kwargs)`
+
+**Needs documentation**
+
+####`biotools.analysis.plot.report(ntvar, aavar, lnt, laa)`
+
+**Needs documentation**
+
+####`biotools.analysis.plot.smoothed(unsmoothed, factor)`
+
+**Needs documentation**
+
+###`biotools.analysis.predict`
+
+**Needs documentation**
+
+####`biotools.analysis.predict.GeneFromBLAST(db, sequences, pref, names)`
+
+BLASTs database against sequences, and for those results that pass the
+length and percent identity requirements, attempt to locate the full gene
+that corresponds to that BLAST hit. Genes that are found are saved in the
+subdirectory sequences under the given directory, divided depending on
+whether the sequnece is amino acid or nucleotide.
+
+####`biotools.analysis.predict.ORFGenerator(sequ)`
+
+Scans both strands of the given sequence and yields the longest subsequence
+that starts with a start codon and contains no stop codon other than the
+final codon.
+
+####`biotools.analysis.predict.run(subject, query, prefix, names)`
+
+**Needs documentation**
+
+####`biotools.analysis.predict.ThreadQueue`
+
+**Needs documentation**
+
+###`biotools.analysis.renamer`
+
+**Needs documentation**
+
+####`biotools.analysis.renamer.rename(direc, db, files)`
+
+This isn't really for bioinformatics, this is more for the pipeline, to
+rename the files generated by cluster.py with a little human interaction.
+
+###`biotools.analysis.report`
+
+**Needs documentation**
+
+####`biotools.analysis.report.plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', upperbound=0.05, factor=21, fig=<matplotlib.figure.Figure object at 0x102261910>, **kwargs)`
+
+**Needs documentation**
+
+####`biotools.analysis.report.report(plotdata, **kwargs)`
+
+**Needs documentation**
+
+###`biotools.analysis.run`
+
+**Needs documentation**
+
+####`biotools.analysis.run.run(infile, strains)`
+
+Run several instances of `genepredict.run` at once.
+
+###`biotools.analysis.variance`
+
+**Needs documentation**
+
+####`biotools.analysis.variance.SaySNPs(input)`
+
+Takes a clustalw alignment and will return a dictionary of data
+relevent to plotting the sequence variance for the sequences in the
+given clustalw alignment. These data are:
+* `var`: the measure of sequence variation,
+* `starts`: the starting positions for each gene model in amino acids,
+* `ends`: the ending positions for each gene model in amino acids, and
+* `count`: the number of sequences with a particular gene model.
+The values given in `starts`, `ends`, and `counts` are sorted to that the 
+nth element in starts corresponds to the nth value in ends and the nth 
+value in counts.
+
+####`biotools.analysis.variance.var(strain, fmt)`
+
+Returns plot data and metadata for plotting later on in the pipeline.
+
 ##`biotools.IO`
 
 A module for reading and writing to sequence and annotation files. Currently
 supported file types are: FASTA, FASTQ, CLUSTAL alignments, and GFF3 files.
+
+###`biotools.IO.clustal`
+
+Methods for manipulating clustalw alignment files.
+
+####`biotools.IO.clustal.probe(fh)`
+
+**Needs documentation**
+
+####`biotools.IO.clustal.read(fh)`
+
+**Needs documentation**
+
+####`biotools.IO.clustal.rhook(fh)`
+
+**Needs documentation**
+
+###`biotools.IO.fasta`
+
+Functions for manipulating FASTA files.
+
+####`biotools.IO.fasta.probe(fh)`
+
+Probe a file to determine whether or not it is a FASTA file. That is,
+the first non-empty line should begin with a caret ('>'). If no caret is
+found on the first line, then we conclude that it is not a FASTA file
+and return False, otherwise, we return a dictionary with information
+relevant to the FASTA file type.
+
+####`biotools.IO.fasta.read(fh)`
+
+Read sequences in FASTA format; identifiers (names and definition lines) 
+are on lines that begin with carets ('>') and sequence is on lines that 
+intervene between the carets. This function is a generator that yields
+`Sequence` objects.
+
+####`biotools.IO.fasta.write(fh, s)`
+
+Write sequences in FASTA format, i.e.,
+
+```
+>name defline
+sequence ...
+```
+
+Sequences are wrapped to 70 characters by default.
+
+###`biotools.IO.fastq`
+
+Functions for manipulating FASTQ files.
+
+####`biotools.IO.fastq.probe(fh)`
+
+Probe a file to determine whether or not it is a FASTQ file. That is,
+the first non-empty line should begin with a caret ('@') and the 3rd line
+following that first non-empty line should contain no character with
+ordinal value less than 32. If none of the characters have ordinal value
+less than 64, then the file is guessed to be encoded in Phred64, otherwise
+it is encoded in Phred32. This function will return False if the file is
+not in FASTQ format and will return a dictionary with the phred score and
+type ('fastq') if the file is FASTQ.
+
+####`biotools.IO.fastq.read(fh)`
+
+Read sequences in FASTQ format; identifiers are on lines that begin with 
+at symbols ('@'), sequence follows on the next line, then a line that 
+begins and sequence is with a plus sign ('+') and finally the quality 
+scores on the subsequent line. Quality scores are encoded in Phred format,
+the type of which (either 32 or 64) is determined when the file is probed
+for opening. The scores are decoded into a list of integers. This function 
+is a generator that yields `Sequence` objects.
+
+####`biotools.IO.fastq.write(fh, s)`
+
+Write sequences in FASTA format, i.e.,
+
+```
+@name
+sequence ...
++
+quality scores
+```
+
+###`biotools.IO.get_methods()`
+
+**Needs documentation**
+
+###`biotools.IO.gff`
+
+**Needs documentation**
+
+####`biotools.IO.gff.probe(fh)`
+
+**Needs documentation**
+
+####`biotools.IO.gff.read(fh)`
+
+**Needs documentation**
+
+####`biotools.IO.gff.whook(fh)`
+
+**Needs documentation**
+
+####`biotools.IO.gff.write(fh, a)`
+
+**Needs documentation**
 
 ###`biotools.IO.IOBase(self, name, mode)`
 
@@ -147,85 +433,8 @@ Close the file handle.
 Forces a file to be parsed as a particular format. By default, the
 values for fmt can be any recognized format.
 
-###`biotools.IO.Reader(self, filename, mode='r')`
-
-A class that wraps IOBase and restricts the ability to write.
-
-####`biotools.IO.Reader.next(self)`
-
-Reads a single entry in the file and returns it.
-
-####`biotools.IO.Reader.read(self, n=None)`
-
-If n is provided, the next (up to) n entries are parsed and returned.
-Otherwise, all remaining entries are parsed and returned.
-
-###`biotools.IO.Writer(self, filename, mode='w')`
-
-A class that wraps IOBase and restricts the ability to read.
-
-####`biotools.IO.Writer.write(self, sequence)`
-
-Writes sequence as the correct format to the file.
-
-###`biotools.IO.clustal`
-**Needs documentation**
-
-####`biotools.IO.clustal.clean_alignment(x)`
-**Needs documentation**
-
-####`biotools.IO.clustal.probe(fh)`
-**Needs documentation**
-
-####`biotools.IO.clustal.read(fh)`
-**Needs documentation**
-
-####`biotools.IO.clustal.rhook(fh)`
-**Needs documentation**
-
-###`biotools.IO.fasta`
-**Needs documentation**
-
-####`biotools.IO.fasta.probe(fh)`
-**Needs documentation**
-
-####`biotools.IO.fasta.read(fh)`
-**Needs documentation**
-
-####`biotools.IO.fasta.write(fh, s)`
-**Needs documentation**
-
-###`biotools.IO.fastq`
-**Needs documentation**
-
-####`biotools.IO.fastq.probe(fh)`
-**Needs documentation**
-
-####`biotools.IO.fastq.read(fh)`
-**Needs documentation**
-
-####`biotools.IO.fastq.write(fh, s)`
-**Needs documentation**
-
-###`biotools.IO.get_methods()`
-**Needs documentation**
-
-###`biotools.IO.gff`
-**Needs documentation**
-
-####`biotools.IO.gff.probe(fh)`
-**Needs documentation**
-
-####`biotools.IO.gff.read(fh)`
-**Needs documentation**
-
-####`biotools.IO.gff.whook(fh)`
-**Needs documentation**
-
-####`biotools.IO.gff.write(fh, a)`
-**Needs documentation**
-
 ###`biotools.IO.manager`
+
 **Needs documentation**
 
 ####`biotools.IO.manager.IOManager(self, methods=None)`
@@ -266,171 +475,24 @@ to the default methods (which do nothing).
 Open a file for parsing or creation. Returns either a Reader or Writer
 object, depending on the open mode.
 
-##`biotools.analysis`
-**Needs documentation**
+###`biotools.IO.Reader(self, filename, mode='r')`
 
-###`biotools.analysis.cluster`
-**Needs documentation**
+A class that wraps IOBase and restricts the ability to write.
 
-####`biotools.analysis.cluster._run_clustal(q, clusters, direc, names)`
-**Needs documentation**
+####`biotools.IO.Reader.next(self)`
 
-####`biotools.analysis.cluster.run(direc, inputs)`
+Reads a single entry in the file and returns it.
 
-Takes a collection of files generated by gene prediction, creates clusters
-based off of the genes that have homology to those predicted genes, and
-creates new fasta files in the clusters sub directory under the given
-directory and separated according to whether they are nucleotide or amino
-acid sequnces. These new fasta files are then used to create clustalw
-alignments of the genes if more than 1 sequence exists in the fasta file.
+####`biotools.IO.Reader.read(self, n=None)`
 
-###`biotools.analysis.loaddata`
+If `n` is provided, the next (up to) `n` entries are parsed and 
+returned. Otherwise, all remaining entries are parsed and returned.
 
-This is a pretty simple JSON-like parser. Specifically, it can load Python-like
-object, list, and other literals, i.e., the sort of stuff you'd get it you
-dumped the the string representation of some data into a file.
+###`biotools.IO.Writer(self, filename, mode='w')`
 
-The real difference is that you must specify a variable name, e.g.:
+A class that wraps IOBase and restricts the ability to read.
 
-```python
-my_stuff = { ... }
-```
+####`biotools.IO.Writer.write(self, sequence)`
 
-These variable names don't need to be on a newline or anything like that, you
-should be able to omit any and all whitespace. The result of a successful 
-parse is a dictionary:
-
-```python
-{'my_stuff': { ... }}
-```
-
-This function really only works for `None`, `True`, `False`, numbers, strings, 
-dictionaries, and lists.
-
-####`biotools.analysis.loaddata.parse(ipt)`
-**Needs documentation**
-
-###`biotools.analysis.options`
-**Needs documentation**
-
-####`biotools.analysis.options.debug(msg)`
-**Needs documentation**
-
-####`biotools.analysis.options.help()`
-
-Prints the usage.
-
-####`biotools.analysis.options.parse(pargs)`
-
-Parses `pargs` and sets global variables to be accessible to other
-modules.
-
-These variables are:
-* `LENGTH_ERR`
-* `MIN_IDENTITY`
-* `MAX_EVALUE`
-* `NUM_THREADS`
-* `NUM_PROCESSES`
-* `START_CODONS`
-* `START_CODONS`
-* `DIRECTORY`
-* `PLOTTER`
-* `args`
-
-###`biotools.analysis.plot`
-**Needs documentation**
-
-####`biotools.analysis.plot.axes(bottom, side, bound, fig, **kwargs)`
-**Needs documentation**
-
-####`biotools.analysis.plot.draw(x, y, ax, color, **kwargs)`
-**Needs documentation**
-
-####`biotools.analysis.plot.models(starts, ends, counts, bound, ax, **kwargs)`
-**Needs documentation**
-
-####`biotools.analysis.plot.plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', upperbound=0.05, factor=21, fig=<matplotlib.figure.Figure object at 0x1021f8750>, **kwargs)`
-**Needs documentation**
-
-####`biotools.analysis.plot.report(ntvar, aavar, lnt, laa)`
-**Needs documentation**
-
-####`biotools.analysis.plot.smoothed(unsmoothed, factor)`
-**Needs documentation**
-
-###`biotools.analysis.predict`
-**Needs documentation**
-
-####`biotools.analysis.predict.GeneFromBLAST(db, sequences, pref, names)`
-
-BLASTs database against sequences, and for those results that pass the
-length and percent identity requirements, attempt to locate the full gene
-that corresponds to that BLAST hit. Genes that are found are saved in the
-subdirectory sequences under the given directory, divided depending on
-whether the sequnece is amino acid or nucleotide.
-
-####`biotools.analysis.predict.ORFGenerator(sequ)`
-
-Scans both strands of the given sequence and yields the longest subsequence
-that starts with a start codon and contains no stop codon other than the
-final codon.
-
-####`biotools.analysis.predict.ThreadQueue`
-**Needs documentation**
-
-####`biotools.analysis.predict._genepredict_in_range(seq, start, end, frame)`
-**Needs documentation**
-
-####`biotools.analysis.predict._genepredict_target(qin, qout, orfs, subj)`
-**Needs documentation**
-
-####`biotools.analysis.predict.run(subject, query, prefix, names)`
-**Needs documentation**
-
-###`biotools.analysis.renamer`
-**Needs documentation**
-
-####`biotools.analysis.renamer.rename(direc, db, files)`
-
-This isn't really for bioinformatics, this is more for the pipeline, to
-rename the files generated by cluster.py with a little human interaction.
-
-###`biotools.analysis.report`
-**Needs documentation**
-
-####`biotools.analysis.report.plot(plotdata, directory, bottom=True, side=True, legend=True, save=True, filename='untitled.pdf', upperbound=0.05, factor=21, fig=<matplotlib.figure.Figure object at 0x102260b50>, **kwargs)`
-**Needs documentation**
-
-####`biotools.analysis.report.report(plotdata, **kwargs)`
-**Needs documentation**
-
-###`biotools.analysis.run`
-**Needs documentation**
-
-####`biotools.analysis.run._run_genepredict(q, infile, names)`
-**Needs documentation**
-
-####`biotools.analysis.run.run(infile, strains)`
-
-Run several instances of `genepredict.run` at once.
-
-###`biotools.analysis.variance`
-**Needs documentation**
-
-####`biotools.analysis.variance.SaySNPs(input)`
-
-Takes a clustalw alignment and will return a dictionary of data
-relevent to plotting the sequence variance for the sequences in the
-given clustalw alignment. These data are:
-* `var`: the measure of sequence variation,
-* `starts`: the starting positions for each gene model in amino acids,
-* `ends`: the ending positions for each gene model in amino acids, and
-* `count`: the number of sequences with a particular gene model.
-The values given in `starts`, `ends`, and `counts` are sorted to that the 
-nth element in starts corresponds to the nth value in ends and the nth 
-value in counts.
-
-####`biotools.analysis.variance.var(strain, fmt)`
-
-Returns plot data and metadata for plotting later on in the pipeline.
+Writes sequence as the correct format to the file.
 

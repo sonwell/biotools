@@ -1,31 +1,12 @@
-def _parseAttrs(attr, token='='):
-    '''
-    _parseAttrs(attr, token) /internal/
-    Creates a dictionary from the atrributes (9th column) of a gff file. By
-    default, token is '=', which is the separator used in gff version 3.
-
-    In other words, attr "a=b;c=d;" and token '=' will yield the dictionary
-    {'a':'b','c':'d'}. The other separator (';') cannot be changed.
-
-    This function is not to be called on its own.
-    '''
-
-    attributes = {}
-    attrs = [a.strip() for a in attr.strip().split(';')]
-    for attribute in attrs:
-        pos = attribute.find(token)
-        if pos > -1:
-            var, val = attribute[:pos], attribute[pos + 1:]
-            attributes[var] = attributes.get(var, []) + [val]
-
-    for key in attributes:
-        attributes[key] = ','.join(attributes[key])
-    return attributes
+'''
+This module is used to create annotation files (currently, only GFF files).
+The annotations can be used to create a heirarchy among the annotations (e.g.,
+genes contain exons, introns, ... etc.).
+'''
 
 
 class Annotation(object):
     '''
-    class Annotation
     An object to help with reading and writing GFF files.
     '''
     unknowns = 0
@@ -33,23 +14,49 @@ class Annotation(object):
     def __init__(self, ref, src, type, start, end, score, strand, phase,
                  attr, name_token='ID', gff_token='='):
         '''
-        Annotation(ref, src, type, start, end, score,
-            strand, phase, attr, name_token, gff_token)
-        Constructs an Annotation object with the necessary values. The
+        Constructs an `Annotation` object with the necessary values. The
         parameters are passed in the same order as the columns from a GFF
         (version 3) file and the name_token and gff_token parameters are the
         defaults for a gff version 3 file from phytozome. Just write (e.g.)
-        Annotation(*line.split('\\t')) #(splitting on tabs), and the rest of
-        the work will be done for you. Other sources may require changes to
-        name_tokens and gff_token.
 
-        Instantiating an Annotation will generate for it an id of the form
-        SEQNAME_TYPE[START:END], where SEQNAME is the name of the sequence
-        (column 1) from the GFF file, and type is like 'gene' or 'CDS'. If no
-        SEQNAME is provided, then 'X' be used in its place, and if no
-        identifier can be found in the attributes, the Annotation will
-        generate an identifier for itself in the form of unknown #.
+        ```python
+        Annotation(*line.split('\\t'))  #(splitting on tabs)
+        ```
+
+        and the rest of the work will be done for you. Other sources may 
+        require changes to `name_tokens` and `gff_token`.
+
+        Instantiating an `Annotation` will generate for it an id of the form
+        *SEQNAME*_*TYPE*[START:END], where *SEQNAME* is the name of the 
+        sequence (column 1) from the GFF file, and type is like 'gene' or 
+        'CDS'. If no *SEQNAME* is provided, then `X` be used in its place, and
+        if no identifier can be found in the attributes, the `Annotation` will
+        generate an identifier for itself in the form of `unknown #`.
         '''
+
+        def parse_attrs(attr, keyvalsep='=', attrsep=';'):
+            '''
+            Creates a dictionary from the atrributes (9th column) of a gff 
+            file. By default, key-value separator (`keyvalsep`) is `=`, which 
+            is the separator used in gff version 3.
+
+            In other words, `attr` `"a=b;c=d;"` and `keyvalsep` `=` will 
+            yield the dictionary `{'a':'b','c':'d'}`. The other separator 
+            (`attrsep`) separates individual attributes and defaults to ';', 
+            which is also the norm in GFF files.
+            '''
+
+            attributes = {}
+            attrs = [a.strip() for a in attr.strip().split(attrsep)]
+            for attribute in attrs:
+                pos = attribute.find(keyvalsep)
+                if pos > -1:
+                    var, val = attribute[:pos], attribute[pos + 1:]
+                    attributes[var] = attributes.get(var, []) + [val]
+
+            for key in attributes:
+                attributes[key] = ','.join(attributes[key])
+            return attributes
 
         start, end = int(start), int(end)
         self.strand = strand
@@ -58,7 +65,7 @@ class Annotation(object):
         self.seq = ref
         self.start = min(start, end)
         self.end = max(end, start)
-        self.attr = _parseAttrs(attr, gff_token)
+        self.attr = parse_attrs(attr, gff_token)
         self.phase = phase
         self.score = score
         self.ntoken = name_token
@@ -73,13 +80,13 @@ class Annotation(object):
         self.children = []
 
     '''
-    Some things that you can do to Annotation objects:
-    * len(annotation) => gets the length of the annotation (end-start+1)
-    * dictionary[annotation] => store annotations as keys of a dictionary or
+    Some things that you can do to `Annotation` objects:
+    * `len(annotation)` => length of the annotation (`end-start+1`)
+    * `dictionary[annotation]` => store annotations as keys of a dictionary or
         as elements in a set
-    * annA == annB => compare two Annotations, they are the same if they have
+    * `annA == annB` => compare two Annotations, they are the same if they have
         the same id.
-    * print annotation => prints the annotation as a line of a GFF version 3
+    * `print annotation` => prints the annotation as a line of a GFF version 3
         file.
     '''
 

@@ -4,13 +4,20 @@ object, list, and other literals, i.e., the sort of stuff you'd get it you
 dumped the the string representation of some data into a file.
 
 The real difference is that you must specify a variable name, e.g.:
-    my_stuff = { ... }
+
+```python
+my_stuff = { ... }
+```
+
 These variable names don't need to be on a newline or anything like that, you
 should be able to omit any and all whitespace. The result of a successful 
 parse is a dictionary:
-    {'my_stuff': { ... }}
 
-This function really only works for None, True, False, numbers, strings, 
+```python
+{'my_stuff': { ... }}
+```
+
+This function really only works for `None`, `True`, `False`, numbers, strings, 
 dictionaries, and lists.
 '''
 
