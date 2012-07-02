@@ -68,20 +68,6 @@ Optional named arguments can currently only be `evalue`, `num_threads`,
 `gapopen`, or `gapextend`. The correspond to the BLAST options of the same 
 name.
 
-###`biotools.blosum62`
-
-This is a pretty uninteresting file, the BLOSUM62 matrix I think I ripped from
-wikipedia, and just hacked it to pieces to make it do what I want. Lookup
-looks something like `blosum62['A','C']` and would give the value corresponding
-to the replacement of alanine with cystine.
-
-Basically, you don't need to be using this file, it is just to help in
-align.py.
-
-####`biotools.blosum62.blosum62(self)`
-
-**Needs documentation**
-
 ###`biotools.clustal`
 
 **Needs documentation**
@@ -496,3 +482,65 @@ A class that wraps IOBase and restricts the ability to read.
 
 Writes sequence as the correct format to the file.
 
+#`prok-geneseek`
+
+```
+Usage: prok-geneseek [options] <database> <sequences ...>
+
+Options:
+  -h, --help            show this help message and exit
+  -S START, --start=START
+                        define a start codon [default: -S ATG]
+  -E STOP, --stop=STOP  define a stop codon [default: -E TAG -E TAA -E TGA]
+  -j THREADS, --threads=THREADS
+                        number of threads [default: 16]
+  -p PROCESSES, --processes=PROCESSES
+                        number of parallel processes to run [default: 2]
+  -e EVALUE, --evalue=EVALUE
+                        maximum e-value [default: 1e-30]
+  -I IDENTITY, --identity=IDENTITY
+                        minimum percent identity [default: 0.45]
+  -L FRACTION, --length=FRACTION
+                        allowable relative error in hit length [default: 0.2]
+  -O bases, --orflen=bases
+                        minimum allowable length for ORFs [default: 300]
+  -d DIRECTORY, --directory=DIRECTORY
+                        minimum percent length [default: current]
+  -P PLOTTER, --plotter=PLOTTER
+                        plotting module [default: biotools.analysis.plot]
+  -v, --verbose         print debug messages [default: False]
+  --no-plots            suppress the drawing of plots [default: False]
+  --no-predict          don't predict genes, instead treat the input files as
+                        predicted genes [default: False]
+  --no-cluster          don't cluster the sequences, instead treat the input
+                        files as alignments [default: False]
+  --no-rename           don't rename the fasta and clustal files [default:
+                        False]
+  --no-reports          don't generate files for variance data [default:
+                        False]
+  --no-calculation      don't calculate sequence variance [default: False]
+```
+
+#`grepseq`
+
+age: grepseq [options] <pattern> <files ...>
+
+Options:
+  -h, --help            show this help message and exit
+  -c, --count           Suppress normal output; instead print a count of
+                        matching lines for each input file. With the -v,
+                        --invert-match option (see below), count non-matching
+                        lines.
+  -H, --with-filename   Print the filename for each match.
+  -i, --ignore-case     Ignore case distinctions in both the pattern and
+                        input files.
+  -m NUM, --max-count=NUM
+                        Stop reading a file after NUM matching lines. When
+                        the -c or --count option is also used, grepseq does
+                        not output a count greater than NUM. When the -v or
+                        --invert-match option is also used, grep stops after
+                        outputting NUM non-matching lines.
+  -N, --names-only      Search only sequence names. Cannot be used with -S.
+  -S, --sequences-only  Search only sequences. Cannot be used with -N.
+  -v, --invert-match    Invert the sense of matching, to select non-matching
+                        lines.
