@@ -524,7 +524,7 @@ Options:
 #`grepseq`
 
 ```
-age: grepseq [options] <pattern> <files ...>
+Usage: grepseq [options] <pattern> <files ...>
 
 Options:
   -h, --help            show this help message and exit
