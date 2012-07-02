@@ -126,7 +126,7 @@ def OptimalCTether(reference, translation, extend=1, create=10):
                     [mat[i + 1][j] - extend - gpc[i + 1][j], VGAP_MARK],
                     [mat[i][j + 1] - extend - gpc[i][j + 1], HGAP_MARK]]
             mat[i + 1][j + 1], pnt[i + 1][j + 1] = max(vals)
-            gpc[i + 1][j + 1] = int(pnt[i + 1][j + 1] == DIAG_MARK)
+            gpc[i + 1][j + 1] = create * int(pnt[i + 1][j + 1] == DIAG_MARK)
             if w[j] in starts:
                 if (optimal[0] is None or mat[i + 1][j + 1] > optimal[0]) and \
                         abs(lv - i) / float(lv) <= options.LENGTH_ERR:
