@@ -523,6 +523,7 @@ Options:
 
 #`grepseq`
 
+```
 age: grepseq [options] <pattern> <files ...>
 
 Options:
@@ -544,3 +545,4 @@ Options:
   -S, --sequences-only  Search only sequences. Cannot be used with -N.
   -v, --invert-match    Invert the sense of matching, to select non-matching
                         lines.
+```
