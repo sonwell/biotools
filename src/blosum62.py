@@ -42,4 +42,10 @@ class blosum62(object):
         self.order = dict([(acids[i], i) for i in range(len(acids))])
 
     def __getitem__(self, q):
-        return self.matrix[self.order[q[0]] * 22 + self.order[q[1]]]
+        return self.matrix[self.order[q[0]] * len(self.order) + self.order[q[1]]]
+
+
+if __name__ == "__main__":
+    bl = blosum62()
+    acids = 'C S T P A G N D E Q H R K M I L V F Y W X *'.split() 
+    print [(i, j, bl[i,j]) for i in acids for j in acids]
