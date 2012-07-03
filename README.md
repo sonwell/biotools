@@ -543,25 +543,21 @@ Usage: grepseq [options] <pattern> <files ...>
 
 Options:
   -h, --help            show this help message and exit
-  -c, --count                                     Suppress normal output;
-                        instead print a count of
+  -c, --count           Suppress normal output; instead print a count of
                         matching lines for each input file. With the -v,
                         --invert-match option (see below), count non-matching
                         lines.
   -H, --with-filename   Print the filename for each match.
-  -i, --ignore-case                               Ignore case distinctions in
-                        both the pattern and                          input
-                        files.
+  -i, --ignore-case     Ignore case distinctions in both the pattern and
+                        input files.
   -m NUM, --max-count=NUM
-                                                  Stop reading a file after
-                        NUM matching lines. When                          the
-                        -c or --count option is also used, grepseq does
+                        Stop reading a file after NUM matching lines. When
+                        the -c or --count option is also used, grepseq does
                         not output a count greater than NUM. When the -v or
                         --invert-match option is also used, grep stops after
                         outputting NUM non-matching lines.
   -N, --names-only      Search only sequence names. Cannot be used with -S.
   -S, --sequences-only  Search only sequences. Cannot be used with -N.
-  -v, --invert-match                              Invert the sense of
-                        matching, to select non-matching
+  -v, --invert-match    Invert the sense of matching, to select non-matching
                         lines.
 ```
