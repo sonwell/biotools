@@ -505,7 +505,7 @@ Options:
   -O bases, --orflen=bases
                         minimum allowable length for ORFs [default: 300]
   -d DIRECTORY, --directory=DIRECTORY
-                        minimum percent length [default: current]
+                        set working directory [default: current]
   -P PLOTTER, --plotter=PLOTTER
                         plotting module [default: biotools.analysis.plot]
   -v, --verbose         print debug messages [default: False]

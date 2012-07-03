@@ -58,7 +58,7 @@ parser.add_option("-O", "--orflen", action="store", dest="orflen",
                   help="minimum allowable length for ORFs [default: %default]")
 parser.add_option("-d", "--directory", action="store", dest="directory",
                   default=DIRECTORY, type="string",
-                  help="minimum percent length [default: current]")
+                  help="set working directory [default: current]")
 parser.add_option("-P", "--plotter", action="store", dest="plotter",
                   default=PLOTTER, type="string",
                   help="plotting module [default: %default]")
