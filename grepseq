@@ -37,30 +37,24 @@ if __name__ == '__main__':
     optp = OptionParser(usage="%prog [options] <pattern> <files ...>")
     optp.add_option('-c', '--count',
                     action='store_true', dest='count', default=False,
-                    help='''
-                         Suppress normal output; instead print a count of
+                    help='''Suppress normal output; instead print a count of
                          matching lines for each input file. With the -v,
                          --invert-match option (see below), count non-matching
-                         lines.
-                         ''')
+                         lines.''')
     optp.add_option('-H', '--with-filename',
                     action='store_true', dest='print_filename', default=False,
                     help='Print the filename for each match.')
     optp.add_option('-i', '--ignore-case',
                     action='store_true', dest='ignore_case', default=False,
-                    help='''
-                         Ignore case distinctions in both the pattern and
-                         input files.
-                         ''')
+                    help='''Ignore case distinctions in both the pattern and
+                         input files.''')
     optp.add_option('-m', '--max-count', metavar='NUM',
                     action='store', dest='max_count', default=None, type='int',
-                    help='''
-                         Stop reading a file after NUM matching lines. When
+                    help='''Stop reading a file after NUM matching lines. When
                          the -c or --count option is also used, grepseq does
                          not output a count greater than NUM. When the -v or
                          --invert-match option is also used, grep stops after
-                         outputting NUM non-matching lines.
-                         ''')
+                         outputting NUM non-matching lines.''')
     optp.add_option('-N', '--names-only',
                     action='store_false', dest='search_seq', default=True,
                     help='Search only sequence names. Cannot be used with -S.')
@@ -69,10 +63,8 @@ if __name__ == '__main__':
                     help='Search only sequences. Cannot be used with -N.')
     optp.add_option('-v', '--invert-match',
                     action='store_true', dest='invert_results', default=False,
-                    help='''
-                         Invert the sense of matching, to select non-matching
-                         lines.
-                         ''')
+                    help='''Invert the sense of matching, to select non-matching
+                         lines.''')
 
     opts, args = optp.parse_args()
     if len(args) < 2:
