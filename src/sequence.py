@@ -71,26 +71,18 @@ class Sequence(object):
         except AttributeError:
             start, stop, step = key, key + 1, 1
 
-        seq = ''.join(self.seq[x] for x in xrange(start, stop, step))
-        qual = self.qual and [self.qual[x] for x in xrange(start, stop, step)]
-
-        order = 1 if step >= 0 else -1
-        sorder = 1 if self.step > 0 else -1
-        dstart, dend = (self.step * start, self.step * (stop - 1))[::order]
-        pstart, pend = (self.start, self.end)[::sorder]
-        newstart, newend = pstart + dstart, pstart + dend
-
+        r = stop - (stop - start) % step
+        seq = self.seq.__getitem__(key)
+        qual = self.qual and self.qual.__getitem__(key)
         info = (self.name, start, stop, step)
-        return Sequence("subsequence(%s,%d,%d,%d)" % info, seq,
+        return Sequence("subsequence(%s, %d, %d, %d)" % info, seq,
                         qual=qual, original=self.original, type=self.type,
-                        start=newstart, end=newend, step=step * self.step)
+                        start=self.start + start, end=self.start + r,
+                        step=step * self.step) 
 
     '''
     Some other things you can do with a Sequence object:
     * len(sequence) => gives the length of the sequence.
-    * sequence.upper() => technically does nothing, but returns the sequence
-        with a capitalized version of the sequence (which is done on
-        instantiation, now).
     * for character in sequence: => allows you to loop over each character in
         the sequence.
     * dictionary[sequence] => allows sequences to be used as keys for
@@ -112,16 +104,8 @@ class Sequence(object):
     def __len__(self):
         return len(self.seq)
 
-    def upper(self):
-        return self
-
-    def __iter__(self):
-        for i in xrange(len(self)):
-            yield self.seq[i:i + 1]
-        raise StopIteration()
-
     def __hash__(self):
-        return self.seq.__hash__()
+        return hash(self.seq)
 
     def __eq__(self, other):
         try:
@@ -131,15 +115,12 @@ class Sequence(object):
 
     def __str__(self):
         if self.qual:
-            return '@%s\n%s\n+\n%s' % (self.name, self.seq,
+            return '@%s\n%s\n+\n%s' % (self.name, self.seq, 
                                        ''.join(chr(ord('A') - 1 + q)
                                                for q in self.qual))
         else:
             return '>%s %s\n%s' % (self.name, self.defline,
                                    '\n'.join(chop(self.seq, 70)))
-
-    def __contains__(self, sub):
-        return sub in self.seq
 
 
 def annotation(seq, source, type, **kwargs):

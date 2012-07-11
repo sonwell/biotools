@@ -109,6 +109,9 @@ class Reader(IOBase):
     '''
     def __init__(self, filename, mode='r'):
         IOBase.__init__(self, filename, mode)
+        self.method['rhook'](self.handle)
+        self.iter = self.method['read'](self.handle)
+        
 
     def read(self, n=None):
         '''
@@ -117,11 +120,10 @@ class Reader(IOBase):
         '''
         if n is None:
             return [s for s in self]
-        return [s for s, i in zip(iter(self), xrange(int(n)))]
+        return [self.iter.next() for i in xrange(int(n))]
 
     def __iter__(self):
-        self.method['rhook'](self.handle)
-        return self.method['read'](self.handle)
+        return self.iter
 
     def next(self):
         '''
