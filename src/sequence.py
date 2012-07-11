@@ -72,8 +72,8 @@ class Sequence(object):
             start, stop, step = key, key + 1, 1
 
         r = stop - (stop - start) % step
-        seq = self.seq.__getitem__(key)
-        qual = self.qual and self.qual.__getitem__(key)
+        seq = ''.join(self.seq[x] for x in xrange(start, stop, step))
+        qual = self.qual and [self.qual[x] for x in xrange(start, stop, step)]
         info = (self.name, start, stop, step)
         return Sequence("subsequence(%s, %d, %d, %d)" % info, seq,
                         qual=qual, original=self.original, type=self.type,
@@ -100,6 +100,14 @@ class Sequence(object):
             def __repr__(self):
                 return self.__str__()
     '''
+
+    def upper(self):
+        return self
+
+    def __iter__(self):
+        for c in self.seq:
+            yield c
+        raise StopIteration()
 
     def __len__(self):
         return len(self.seq)
