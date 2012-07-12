@@ -38,7 +38,6 @@ if __name__ == "__main__":
     calculate = calculate and (cluster or not predict)
     plot = plot and (calculate or not (predict or cluster))
     report = report and calculate
-    print "will report data"
 
     if not (predict or cluster or rename or calculate or plot or report):
         print "I don't know what you want, I give up."
@@ -90,9 +89,8 @@ if __name__ == "__main__":
             try:
                 cv.plot(plotdata, direc + 'plots' + sep,
                         filename=metadata['filename'])
-            except:
-                print "Could not plot"
-                plot = False
+            except Exception as e:
+                print metadata['filename'], e
         if report:
             try:
                 os.mkdir(direc + 'data' + sep)
@@ -101,5 +99,5 @@ if __name__ == "__main__":
 
             fh = open(direc + 'data' + sep + metadata['strain'] + '.py', 'w')
             fh.write('plotdata = ' + repr(plotdata) + '\n')
-            fh.write('metadata = ' + repr(plotdata) + '\n')
+            fh.write('metadata = ' + repr(metadata) + '\n')
     print "Done"

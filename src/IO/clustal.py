@@ -21,6 +21,8 @@ def read(fh):
 
     seqs = {}
     for line in fh:
+        if line.starts(' '):
+            continue
         st = line.strip()
         if st:
             bits = st.split()

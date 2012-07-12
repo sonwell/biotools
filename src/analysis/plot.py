@@ -106,7 +106,7 @@ def draw(x, y, ax, color, **kwargs):
 def models(starts, ends, counts, bound, ax, **kwargs):
     lb, l = bound[2], len(starts)
     scale = bound[1] / max(ends)
-    ys, i = np.arange(l + 1) * lb / 3, 0
+    ys, i = np.arange(1, l + 1) * lb / 3, 0
 
     # draw the gene models
     ax.hlines(ys, starts, ends, colors='k', lw=4, linestyle='solid')
