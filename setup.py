@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name="biotools",
-      version='1.2.2',
+      version='1.2.3',
       description="A bunch of bioinformatics utilities.",
       long_description="""Accompanies Bart, Rebecca, *et al.* High-throughput genomic sequencing of Cassava Bacterial Blight strains identifies conserved effectors to target for durable resistance. *PNAS Plus*.
 
