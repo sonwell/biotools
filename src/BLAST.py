@@ -7,8 +7,7 @@ program available from NCBI.
 
 import biotools.IO as io
 import subprocess
-import os
-import sys
+from os import sep, getenv, listdir
 import shutil
 
 
@@ -26,7 +25,6 @@ def run(db, sfile, mega_blast=False, **kwargs):
     name.
     '''
 
-    sep = os.sep
     cmds = {
         'prot': {
             'prot': 'blastp',
@@ -42,7 +40,7 @@ def run(db, sfile, mega_blast=False, **kwargs):
     qtype = seq.type
 
     rcloc = ''
-    for loc in (".:~:" + (os.getenv("NCBI") or "")).split(':'):
+    for loc in (".:~:" + (getenv("NCBI") or "")).split(':'):
         if loc and loc[-1] == sep:
             loc += sep
         try:
@@ -54,7 +52,7 @@ def run(db, sfile, mega_blast=False, **kwargs):
             pass
 
     dbtype = None
-    bdbenv = os.getenv("BLASTDB")
+    bdbenv = getenv("BLASTDB")
     dblocations = (":." + ((':' + bdbenv) if bdbenv else '') +
                    ((':' + rcloc) if rcloc else '')).split(':')
     for loc in dblocations:
@@ -88,7 +86,7 @@ def run(db, sfile, mega_blast=False, **kwargs):
         else:
             dbdir, db = '.', db[:pos]
 
-        for file in os.listdir(dbdir):
+        for file in listdir(dbdir):
             dpos = file.rfind('.')
             if dpos >= 0 and file[dpos + 1:] == dbtype[0] + 'in':
                 fh = open(dbdir + sep + file, 'r')
@@ -103,19 +101,21 @@ def run(db, sfile, mega_blast=False, **kwargs):
             ndb = '_'.join(db.split())
             try:
                 ignore = open('/dev/null', 'w')
-                mbdb = 'makeblastdb'
             except IOError:
                 ignore = open('nul', 'w')
-                mbdb = 'makeblastdb.exe'
 
-            subprocess.call([mbdb, "-in", '"%s"' % odb, "-out", ndb,
-                            "-dbtype", dbtype], stdout=ignore)
-            try:
-                for suff in ['in', 'hr', 'sq']:
-                    name = ndb + '.' + dbtype[0] + suff
-                    shutil.copyfile(name, dbdir + sep + name)
-            except shutil.Error:
-                pass
+            try:  # possible race condition
+                open(ndb, 'r').close()
+            except IOError:
+                subprocess.call(["makeblastdb", "-in", '"%s"' % odb,
+                                 "-out", ndb, "-dbtype", dbtype],
+                                 stdout=ignore)
+                try:
+                    for suff in ['in', 'hr', 'sq']:
+                        name = ndb + '.' + dbtype[0] + suff
+                        shutil.copyfile(name, dbdir + sep + name)
+                except shutil.Error:
+                    pass
             db = dbdir + sep + ndb
         else:
             db = ndb
@@ -130,8 +130,6 @@ def run(db, sfile, mega_blast=False, **kwargs):
         pn = ["-d", "-i"]
         allowed = ["e", "a"]
 
-    if sys.platform in ('win32'):
-        cmd += '.exe'
     proc = subprocess.Popen([cmd, pn[0], db, pn[1], sfile] +
                             [arg for pair in
                              [["-" + k, str(kwargs[k])] for k in allowed]

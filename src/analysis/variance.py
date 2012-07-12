@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import sys
-import os
+
 import biotools.IO as io
 import biotools.analysis.options as options
 

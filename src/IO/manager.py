@@ -1,3 +1,10 @@
+'''
+This module is home to the IOManager class, which manages the various input
+and output formats (specifically, FASTA, FASTQ, CLUSTAL alignments, and GFF
+files, currently).
+'''
+
+
 class IOManager(object):
     '''
     A class used by the `IOBase` class to manage the various input and output
@@ -22,7 +29,7 @@ class IOManager(object):
     * `probe` => takes a file handle opened for reading; returns a dictionary
         of attributes to be applied to the `IOBase` instance.
 
-    This class behaves similarly to a dicitonary, except that the get method
+    This class behaves similarly to a dictionary, except that the get method
     will default to the default method (which does nothing) if no truthy
     second parameter is passed.
     '''

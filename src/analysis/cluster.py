@@ -11,8 +11,7 @@ except ImportError:
 import hashlib
 import subprocess
 import threading
-import os
-import sys
+from os import sep, mkdir
 
 
 def run(direc, inputs):
@@ -25,7 +24,6 @@ def run(direc, inputs):
     alignments of the genes if more than 1 sequence exists in the fasta file.
     '''
 
-    sep = os.sep
     clusters = {}
     all_ids = set()
     ids = {}
@@ -74,7 +72,7 @@ def run(direc, inputs):
     if direc:
         for d in [direc, direc + 'nt' + sep, direc + 'aa' + sep]:
             try:
-                os.mkdir(d)
+                mkdir(d)
             except OSError:
                 pass
 
@@ -115,7 +113,3 @@ def run(direc, inputs):
     run_clustal()
     q.join()
     return filenames
-
-
-if __name__ == '__main__':
-    run(None, sys.argv[1:])

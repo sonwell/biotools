@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import biotools.IO as io
 import subprocess
-import os
-import sys
+from os import remove
 
 
 def run(infile, outfile, **kwargs):
@@ -15,8 +14,6 @@ def run(infile, outfile, **kwargs):
 
     if n > 1:
         cmd = "clustalw"
-        if sys.platform in ('cygwin', 'win32'):
-            cmd += '.exe'
 
         try:
             ignore = open('/dev/null', 'w')
@@ -53,4 +50,4 @@ def run(infile, outfile, **kwargs):
             prefix = infile[:pos]
         else:
             prefix = infile
-        os.remove(prefix + '.dnd')
+        remove(prefix + '.dnd')

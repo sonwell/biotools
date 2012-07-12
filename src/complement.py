@@ -21,12 +21,12 @@ def complement(s):
     elif 'T' in s and 'U' not in s:
         repl = _ref['DNA']
     else:
-        return s   # must be a strange protein or something
+        repl = _ref['DNA']
     value = ''.join(repl.get(c, 'N') for c in s.upper())
     try:
         return s.__class__("complement(%s)" % s.name, value,
                            original=s.original, start=s.start,
-                           end=s.end, step=s.step)
+                           end=s.end, step=s.step, qual=s.qual)
     except (AttributeError, TypeError):
         return s.__class__(value)
 

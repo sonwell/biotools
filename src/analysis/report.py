@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import biotools.analysis.plot as bap
+from os import sep, mkdir
 
 
 # report areas of high conservation or variation
@@ -14,9 +15,8 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True,
 
     ranges = report(plotdata, **kwargs)
 
-    sep = os.sep
     try:
-        os.mkdir(directory)
+        mkdir(directory)
     except OSError:
         pass
 

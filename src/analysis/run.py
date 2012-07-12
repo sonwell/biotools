@@ -3,14 +3,11 @@
 import biotools.analysis.predict as genepredict
 import biotools.analysis.options as options
 import threading
-import sys
-import os
+from os import sep
 try:
     import Queue as queue
 except ImportError:
     import queue
-
-
 
 
 def run(infile, strains):
@@ -27,7 +24,7 @@ def run(infile, strains):
                 strainf = q.get(False)
             except queue.Empty:
                 break
-            strain = strainf.split(os.sep)[-1]
+            strain = strainf.split(sep)[-1]
             pos = strain.rfind('.')
             if pos > 1 or (pos == 1 and strain[0] != '.'):
                 strain = strain[:pos]

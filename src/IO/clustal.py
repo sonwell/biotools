@@ -40,7 +40,7 @@ def probe(fh):
     for line in fh:
         st = line.strip()
         if st:
-            if st.split()[0].lower() == 'CLUSTAL':
+            if st.startswith('CLUSTAL'):
                 return {'type': 'clustalw'}
             return False
     return {'type': 'clustalw'}

@@ -38,6 +38,7 @@ if __name__ == "__main__":
     calculate = calculate and (cluster or not predict)
     plot = plot and (calculate or not (predict or cluster))
     report = report and calculate
+    print "will report data"
 
     if not (predict or cluster or rename or calculate or plot or report):
         print "I don't know what you want, I give up."
@@ -83,9 +84,15 @@ if __name__ == "__main__":
             parsed = ld.parse(open(s, 'r'))
             plotdata = parsed['plotdata']
             metadata = parsed['metadata']
+        else:
+            break
         if plot:
-            cv.plot(plotdata, direc + 'plots' + sep,
-                    filename=metadata['filename'])
+            try:
+                cv.plot(plotdata, direc + 'plots' + sep,
+                        filename=metadata['filename'])
+            except:
+                print "Could not plot"
+                plot = False
         if report:
             try:
                 os.mkdir(direc + 'data' + sep)

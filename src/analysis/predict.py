@@ -12,9 +12,7 @@ try:
 except ImportError:
     import queue
 import threading
-import random
-import sys
-import os
+from os import sep, mkdir
 
 PIPING = True
 
@@ -78,12 +76,11 @@ def GeneFromBLAST(db, sequences, pref, names):
     whether the sequnece is amino acid or nucleotide.
     '''
     PIPING = True
-    sep = os.sep
     wd = options.DIRECTORY + 'sequences' + sep
 
     for d in [options.DIRECTORY, wd]:
         try:
-            os.mkdir(d)
+            mkdir(d)
         except OSError:
             pass
 
@@ -163,7 +160,7 @@ def GeneFromBLAST(db, sequences, pref, names):
         os, oe = sorted((start, end))
         frame = int(frame)
 
-        return (ss <= os and se >= oe and
+        return (ss < oe and se > os and
                 (se % 3 == oe % 3 or ss % 3 == oe % 3) and
                 ((frame < 0 and seq.step < 0) or
                  (frame > 0 and seq.step > 0)))
@@ -217,3 +214,11 @@ def GeneFromBLAST(db, sequences, pref, names):
 
 def run(subject, query, prefix, names):
     GeneFromBLAST(subject, query, prefix, names)
+
+
+if __name__ == '__main__':
+    f = io.open(sys.argv[1], 'r')
+    for seq in f:
+        print seq.name, seq.defline
+        for orf in ORFGenerator(seq):
+            print orf.start , '...', orf.end

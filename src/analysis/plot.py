@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-import os
+from os import sep, mkdir
 
 
 def smoothed(unsmoothed, factor):
@@ -15,14 +15,15 @@ def smoothed(unsmoothed, factor):
 
 def plot(plotdata, directory, bottom=True, side=True, legend=True,
          save=True, filename='untitled.pdf', upperbound=0.05, factor=21,
-         fig=plt.figure(None, facecolor='w', edgecolor='w'), **kwargs):
+         fig=None, **kwargs):
+    if fig is None:
+        fig = plt.figure(None, facecolor='w', edgecolor='w')
 
-    sep = os.sep
     if not directory.endswith(sep):
         directory += sep
 
     try:
-        os.mkdir(directory)
+        mkdir(directory)
     except OSError:
         pass
 
@@ -52,7 +53,7 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True,
     ntl = draw(xnt, snt, ax, '#0000ff', **kwargs)
     aal = draw(xaa, saa, ax, '#00ff00', **kwargs)
     models(starts, ends, counts, bound, ax, **kwargs)
-    report(ntvar, aavar, lnt, laa)
+    report(filename, ntvar, aavar, lnt, laa)
 
     if legend:
         fig.legend((ntl, aal), ('Nucleotide', 'Amino acid'), 'upper right')
@@ -114,7 +115,7 @@ def models(starts, ends, counts, bound, ax, **kwargs):
         i += 1
 
 
-def report(ntvar, aavar, lnt, laa):
+def report(filename, ntvar, aavar, lnt, laa):
     print '=============', filename, '============='
     print 'Average variance: '
     print '\t', sum(ntvar) / lnt, 'per base pair'

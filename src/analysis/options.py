@@ -1,7 +1,7 @@
 from optparse import OptionParser
 from threading import Lock
-import os
-import sys
+from os import sep, makedirs
+from sys import stderr
 
 LENGTH_ERR = 0.2
 MIN_IDENTITY = 0.45
@@ -9,7 +9,7 @@ MAX_EVALUE = 1e-30
 MIN_ORFLEN = 300
 NUM_THREADS = 16
 NUM_PROCESSES = 2
-DIRECTORY = '.' + os.sep
+DIRECTORY = '.' + sep
 PLOTTER = 'biotools.analysis.plot'
 
 START_CODONS = ["ATG"]
@@ -93,7 +93,7 @@ parser.add_option("--no-calculation", action="store_false",
 def debug(msg):
     if verbose:
         lock.acquire(True)
-        sys.stderr.write(str(msg) + '\n')
+        stderr.write(str(msg) + '\n')
         lock.release()
 
 
@@ -122,10 +122,10 @@ def parse(pargs):
 
     opts, largs = parser.parse_args(pargs)
 
-    if opts.directory[-1] != os.sep:
-        opts.directory += os.sep
+    if opts.directory[-1] != sep:
+        opts.directory += sep
     try:
-        os.makedirs(opts.directory)
+        makedirs(opts.directory)
     except OSError:
         pass
 

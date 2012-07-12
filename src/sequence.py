@@ -71,13 +71,15 @@ class Sequence(object):
         except AttributeError:
             start, stop, step = key, key + 1, 1
 
+        order = abs(self.step) / self.step
         r = stop - (stop - start) % step
         seq = ''.join(self.seq[x] for x in xrange(start, stop, step))
         qual = self.qual and [self.qual[x] for x in xrange(start, stop, step)]
         info = (self.name, start, stop, step)
         return Sequence("subsequence(%s, %d, %d, %d)" % info, seq,
                         qual=qual, original=self.original, type=self.type,
-                        start=self.start + start, end=self.start + r,
+                        start=self.start + start * order,
+                        end=self.start + r * order,
                         step=step * self.step) 
 
     '''

@@ -51,9 +51,9 @@ class IOBase(object):
             'fas': 'fasta',
             'fna': 'fasta',
             'fasta': 'fasta',
-            'clustalw': 'clustalw',
-            'clustal': 'clustalw',
-            'aln': 'clustalw',
+            'clustalw': 'clustal',
+            'clustal': 'clustal',
+            'aln': 'clustal',
             'fastq': 'fastq',
             'gff': 'gff',
             'gff3': 'gff'
