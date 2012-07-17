@@ -113,7 +113,7 @@ def run(db, sfile, mega_blast=False, **kwargs):
                 try:
                     for suff in ['in', 'hr', 'sq']:
                         name = ndb + '.' + dbtype[0] + suff
-                        shutil.copyfile(name, dbdir + sep + name)
+                        shutil.move(name, dbdir + sep + name)
                 except shutil.Error:
                     pass
             db = dbdir + sep + ndb

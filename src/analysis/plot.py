@@ -43,10 +43,10 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True,
     laa = len(aavar)
 
     # bounding rectangle
-    bound = [0, laa, -upperbound / 6, upperbound]
+    bound = [0, laa, -upperbound / 6.0, upperbound]
 
     # x-values to align nucleotide & amino acids
-    xnt = np.arange(lnt) / 3 + 1
+    xnt = np.arange(lnt) / 3.0 + 1
     xaa = np.arange(laa) + 1
 
     ax = axes(bottom, side, bound, fig, **kwargs)
@@ -106,12 +106,12 @@ def draw(x, y, ax, color, **kwargs):
 def models(starts, ends, counts, bound, ax, **kwargs):
     lb, l = bound[2], len(starts)
     scale = bound[1] / max(ends)
-    ys, i = np.arange(1, l + 1) * lb / 3, 0
+    ys, i = np.arange(1, l + 1) * lb / 3.0, 0
 
     # draw the gene models
     ax.hlines(ys, starts, ends, colors='k', lw=4, linestyle='solid')
     for c in counts:
-        ax.text(bound[1] + 10, lb / 3 * (i + 1.25), c)
+        ax.text(bound[1] + 10, lb / 3.0 * (i + 1.25), int(c))
         i += 1
 
 
