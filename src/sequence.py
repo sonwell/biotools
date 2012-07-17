@@ -47,10 +47,10 @@ class Sequence(object):
         self.name = name
         self.seq = seq.upper()
         self.qual = kwargs.get('qual', None)
-        self.type = kwargs.get('type', 'prot' if set(seq) - set('ATUCGNYR')
+        self.type = kwargs.get('type', 'prot' if set(seq) - set('ATUCGNYR- ')
                                else 'nucl')
         self.start = kwargs.get('start', 1)
-        self.end = kwargs.get('end', len(seq))
+        self.end = kwargs.get('end', self.start - 1 + len(seq))
         self.step = kwargs.get('step', -1 if self.start > self.end else 1)
         self.original = kwargs.get('original', self)
         self.defline = kwargs.get('defline', '')
@@ -72,7 +72,7 @@ class Sequence(object):
             start, stop, step = key, key + 1, 1
 
         order = abs(self.step) / self.step
-        r = stop - (stop - start) % step
+        r = stop - (stop - start) % step - step
         seq = ''.join(self.seq[x] for x in xrange(start, stop, step))
         qual = self.qual and [self.qual[x] for x in xrange(start, stop, step)]
         info = (self.name, start, stop, step)
