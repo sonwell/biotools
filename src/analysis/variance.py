@@ -2,6 +2,8 @@
 
 import biotools.IO as io
 import biotools.analysis.options as options
+from biotools.translate import translate
+from os import sep
 
 
 def SaySNPs(input):
@@ -44,20 +46,49 @@ def SaySNPs(input):
     }
 
 
-def var(strain, fmt):
+def var(files):
     '''
     Returns plot data and metadata for plotting later on in the pipeline.
     '''
-    plotdata = {
-        'nt': SaySNPs(options.DIRECTORY + fmt % {
-            'strain': strain,
-            'type': 'nt'
-        }),
-        'aa': SaySNPs(options.DIRECTORY + fmt % {
-            'strain': strain,
-            'type': 'aa'
-        })
-    }
-    metadata = {'strain': strain, 'filename': strain + '.pdf'}
+    sort = {}
+    for f in files:
+        seqs = [s for s in io.open(f)]
+        type = set(s.type for s in seqs)
+        if len(type) > 1:
+            type = set(['prot'])
+        fid = (type.pop(), f)
+        seqs = [translate(s.seq) if fid[0] == 'nucl' else s.seq for s in seqs]
+        sset = frozenset(seqs)
+        srtr = (len(seqs), len(seqs[0]), sset)
+        sort[srtr] = sort.get(srtr, set()) | set([fid])
 
-    return plotdata, metadata
+    couples = []
+    for partners in sort.values():
+        trim = lambda x: '.'.join(x.split('.')[:-1]) \
+                         if f.endswith('.clustalw') or \
+                            f.endswith('.clustal') or \
+                            f.endswith('.aln') else x
+        names = ', '.join(set(trim(f.split(sep)[-1]) for type, f in partners))
+        pair = {}
+        for type, f in partners:
+            if len(pair) == 2:
+                break
+            if type in pair:
+                continue
+            pair[type] = f
+        if 0 < len(pair) < 2:
+            raise TypeError("Unmatched clustal alignment(s): " + 
+                            ", ".join(f for type, f in partners))
+        if len(pair) == 0:
+          continue
+        couples.append((pair['nucl'], pair['prot'], names))
+
+    for nt, aa, strain in couples:
+        plotdata = {
+            'nt': SaySNPs(nt),
+            'aa': SaySNPs(aa)
+        }
+        metadata = {'strain': strain, 'filename': strain + '.pdf'}
+
+        yield {'plotdata': plotdata, 'metadata': metadata}
+    raise StopIteration

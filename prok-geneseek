@@ -75,16 +75,15 @@ if __name__ == "__main__":
                 except ImportError:
                     plot = False
 
-    for s in names:
-        if calculate:
-            fmt = "clusters%s%%(type)s%s%%(strain)s.clustalw"
-            (plotdata, metadata) = cs.var(s, fmt % (sep, sep))
-        elif plot:
-            parsed = ld.parse(open(s, 'r'))
-            plotdata = parsed['plotdata']
-            metadata = parsed['metadata']
-        else:
-            break
+    if calculate:
+        gen = cs.var(names)
+    elif plot:
+        gen = (ld.parse(s) for s in names)
+    else:
+        gen = []
+    for entry in gen:
+        plotdata = entry['plotdata']
+        metadata = entry['metadata']
         if plot:
             try:
                 cv.plot(plotdata, direc + 'plots' + sep,
