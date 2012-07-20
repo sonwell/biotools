@@ -57,9 +57,10 @@ def var(files):
         if len(type) > 1:
             type = set(['prot'])
         fid = (type.pop(), f)
-        seqs = [translate(s.seq) if fid[0] == 'nucl' else s.seq for s in seqs]
+        seqs = [''.join(s.seq.split('-')).strip() for s in seqs]
+        seqs = [translate(s) if fid[0] == 'nucl' else s for s in seqs]
         sset = frozenset(seqs)
-        srtr = (len(seqs), len(seqs[0]), sset)
+        srtr = (len(seqs), sset)
         sort[srtr] = sort.get(srtr, set()) | set([fid])
 
     couples = []
