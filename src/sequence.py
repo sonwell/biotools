@@ -67,10 +67,12 @@ class Sequence(object):
         self.original = kwargs.get('original', self)
         self.defline = kwargs.get('defline', '')
 
-    @property
-    def type(self):
-        self.type = 'prot' if isprot(self.seq) else 'nucl'
-        return self.type
+    def __getattr__(self, attr):
+        if attr == 'type':
+            self.type = 'prot' if isprot(self.seq) else 'nucl'
+            return self.type
+        raise AttributeError('%r object has no attribute %r' % 
+                             (self.__class__.__name__, attr))
 
     def __getitem__(self, key):
         '''
@@ -93,6 +95,7 @@ class Sequence(object):
         seq = ''.join(self.seq[x] for x in xrange(start, stop, step))
         qual = self.qual and [self.qual[x] for x in xrange(start, stop, step)]
         info = (self.name, start, stop, step)
+        self.type
         return Sequence("subsequence(%s, %d, %d, %d)" % info, seq,
                         qual=qual, original=self.original, type=self.type,
                         start=self.start + start * order,
