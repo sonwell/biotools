@@ -16,6 +16,18 @@ def chop(seq, length=70):
     raise StopIteration()
 
 
+def isprot(seq, nucleotides='ATUCGNYRatucgnyr- '):
+    '''
+    Check whether the current sequence is a protein or nucleotide sequence.
+    '''
+
+    for c in seq:
+        if c not in nucleotides:
+            return True
+    else:
+        return False
+
+
 class Sequence(object):
     '''
     A wrapper class for sequences.
@@ -55,11 +67,10 @@ class Sequence(object):
         self.original = kwargs.get('original', self)
         self.defline = kwargs.get('defline', '')
 
-    def __getattr__(self, attr):
-        if attr == 'type':
-            self.type = 'prot' if set(self.seq) - set('atucgnyrATUCGNYR- ') \
-                        else 'nucl'
-            return self.type
+    @property
+    def type(self):
+        self.type = 'prot' if isprot(self.seq) else 'nucl'
+        return self.type
 
     def __getitem__(self, key):
         '''

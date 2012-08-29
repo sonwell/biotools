@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from biotools.sequence import isprot
+
 _ref = {
     'DNA': {
         'A': 'T', 'T': 'A', 'a': 't', 't': 'a', 
@@ -22,7 +24,7 @@ def complement(s):
     `Sequence`s or strings.
     '''
 
-    if set(s) - set('ATUCGNRYatucgnry- '):
+    if isprot(s):
         return s
     has_u = ('U' in s or 'u' in s)
     has_t = ('T' in s or 't' in s)
