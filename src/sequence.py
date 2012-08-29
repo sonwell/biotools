@@ -57,7 +57,7 @@ class Sequence(object):
 
     def __getattr__(self, attr):
         if attr == 'type':
-            self.type = 'prot' if set(seq) - set('atucgnyrATUCGNYR- ') \
+            self.type = 'prot' if set(self.seq) - set('atucgnyrATUCGNYR- ') \
                         else 'nucl'
             return self.type
 
