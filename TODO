@@ -1,7 +1,0 @@
-We cannot resume prok-geneseek at the variance step, there needs to be a way to
-pair a nucleotide file with its amino acid counterpart without relying on 
-interleaving the files (so that if you choose to resume at that point you can 
-do e.g. 
-prok-geneseek --no-predict --no-cluster --no-rename [other options] \
-  dir/*/*.fasta.
-
