@@ -53,7 +53,7 @@ def run(db, sfile, mega_blast=False, **kwargs):
 
     dbtype = None
     bdbenv = getenv("BLASTDB")
-    dblocations = (":." + ((':' + bdbenv) if bdbenv else '')
+    dblocations = (":." + ((':' + bdbenv) if bdbenv else '') + 
                    ((':' + rcloc) if rcloc else '')).split(':')
     for loc in dblocations:
         if loc and loc[-1] != sep:
