@@ -27,7 +27,6 @@ def read(fh):
         seq += line
     if name or seq:
         yield Sequence(name, seq, defline=defline)
-    fh.close()
     raise StopIteration()
 
 

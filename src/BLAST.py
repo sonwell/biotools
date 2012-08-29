@@ -13,15 +13,15 @@ import shutil
 
 def run(db, sfile, mega_blast=False, **kwargs):
     '''
-    Takes a database and a query and runs the appropriate type of BLAST on 
-    them. The database can be an existing BLAST database or a fasta/fastq 
-    file. If it is a sequence file, this function will look in the places 
-    where BLAST would look for an existing database created from that file and 
-    use that instead. If there is no such database, this function will make 
+    Takes a database and a query and runs the appropriate type of BLAST on
+    them. The database can be an existing BLAST database or a fasta/fastq
+    file. If it is a sequence file, this function will look in the places
+    where BLAST would look for an existing database created from that file and
+    use that instead. If there is no such database, this function will make
     one for you and then use the newly created database with BLAST.
 
-    Optional named arguments can currently only be `evalue`, `num_threads`, 
-    `gapopen`, or `gapextend`. The correspond to the BLAST options of the same 
+    Optional named arguments can currently only be `evalue`, `num_threads`,
+    `gapopen`, or `gapextend`. The correspond to the BLAST options of the same
     name.
     '''
 
@@ -53,7 +53,7 @@ def run(db, sfile, mega_blast=False, **kwargs):
 
     dbtype = None
     bdbenv = getenv("BLASTDB")
-    dblocations = (":." + ((':' + bdbenv) if bdbenv else '') +
+    dblocations = (":." + ((':' + bdbenv) if bdbenv else '')
                    ((':' + rcloc) if rcloc else '')).split(':')
     for loc in dblocations:
         if loc and loc[-1] != sep:
@@ -144,7 +144,7 @@ class Result(object):
     A class which take the raw output from BLAST and generates dictionaries
     from the data from BLAST. This data includes the alignment, percent
     identity, gaps, e-value, score, length of subject, length of query, and
-    start and stop positions for both sequences. This class should be used in 
+    start and stop positions for both sequences. This class should be used in
     a for loop like so:
 
     ```python
@@ -218,12 +218,11 @@ class Result(object):
                 if line[0] == '>':
                     mode = 3
                     subheaders = sh(line[1:], qname, length)
-                elif line[:6] == 'Length' or \
-                        (line[0] == '(' and line.endswith('letters)')):
-                    if line[:7] == 'Length=':
-                        length = int(''.join(line[7:].strip().split(',')))
-                    else:
-                        length = int(''.join(line[1:-8].strip().split(',')))
+                elif line[:7] == 'Length=':
+                    length = int(''.join(line[7:].strip().split(',')))
+                    mode = 2
+                elif line[0] == '(' and line.endswith('letters)'):
+                    length = int(''.join(line[1:-8].strip().split(',')))
                     mode = 2
                 elif line[:6] == 'Query=':
                     qname = line[6:].strip()
@@ -280,5 +279,56 @@ class Result(object):
                 subheaders[curr]['end'] = end
                 subheaders[curr]['sequence'] += seq.upper()
 
-        yield ra(subheaders)
+        try:
+            yield ra(subheaders)
+        except UnboundLocalError:
+            pass
         raise StopIteration()
+
+if __name__ == '__main__':
+    output = '''
+BLASTN 2.2.25+
+
+
+Reference: Zheng Zhang, Scott Schwartz, Lukas Wagner, and Webb
+Miller (2000), "A greedy algorithm for aligning DNA sequences", J
+Comput Biol 2000; 7(1-2):203-14.
+
+
+
+Database: musa_pseudochromosome_RM.fa
+           12 sequences; 472,960,417 total letters
+
+
+
+Query= OsMADS57_AGL17
+Length=687
+
+
+***** No hits found *****
+
+
+
+Lambda     K      H
+    1.33    0.621     1.12 
+
+Gapped
+Lambda     K      H
+    1.28    0.460    0.850 
+
+Effective search space used: 311680693379
+
+
+  Database: musa_pseudochromosome_RM.fa
+    Posted date:  Aug 6, 2012  1:09 PM
+  Number of letters in database: 472,960,417
+  Number of sequences in database:  12
+
+
+
+Matrix: blastn matrix 1 -2
+Gap Penalties: Existence: 0, Extension: 2.5
+'''
+
+    for result in Result(output):
+        print result

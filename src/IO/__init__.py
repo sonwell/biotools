@@ -1,4 +1,3 @@
-
 '''
 A module for reading and writing to sequence and annotation files. Currently
 supported file types are: FASTA, FASTQ, CLUSTAL alignments, and GFF3 files.
@@ -111,7 +110,6 @@ class Reader(IOBase):
         IOBase.__init__(self, filename, mode)
         self.method['rhook'](self.handle)
         self.iter = self.method['read'](self.handle)
-        
 
     def read(self, n=None):
         '''

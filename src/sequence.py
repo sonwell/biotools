@@ -45,15 +45,21 @@ class Sequence(object):
         '''
 
         self.name = name
-        self.seq = seq.upper()
+        self.seq = seq
         self.qual = kwargs.get('qual', None)
-        self.type = kwargs.get('type', 'prot' if set(seq) - set('ATUCGNYR- ')
-                               else 'nucl')
+        if 'type' in kwargs:
+            self.type = kwargs['type']
         self.start = kwargs.get('start', 1)
         self.end = kwargs.get('end', self.start - 1 + len(seq))
         self.step = kwargs.get('step', -1 if self.start > self.end else 1)
         self.original = kwargs.get('original', self)
         self.defline = kwargs.get('defline', '')
+
+    def __getattr__(self, attr):
+        if attr == 'type':
+            self.type = 'prot' if set(seq) - set('atucgnyrATUCGNYR- ') \
+                        else 'nucl'
+            return self.type
 
     def __getitem__(self, key):
         '''
@@ -80,7 +86,7 @@ class Sequence(object):
                         qual=qual, original=self.original, type=self.type,
                         start=self.start + start * order,
                         end=self.start + r * order,
-                        step=step * self.step) 
+                        step=step * self.step)
 
     '''
     Some other things you can do with a Sequence object:
@@ -104,7 +110,10 @@ class Sequence(object):
     '''
 
     def upper(self):
-        return self
+        return Sequence(self.name, self.seq.upper(), type=self.type,
+                        qual=self.qual, original=self.original,
+                        defline=self.defline, start=self.start, step=self.step,
+                        end=self.end)
 
     def __iter__(self):
         for c in self.seq:
@@ -125,7 +134,7 @@ class Sequence(object):
 
     def __str__(self):
         if self.qual:
-            return '@%s\n%s\n+\n%s' % (self.name, self.seq, 
+            return '@%s\n%s\n+\n%s' % (self.name, self.seq,
                                        ''.join(chr(ord('A') - 1 + q)
                                                for q in self.qual))
         else:

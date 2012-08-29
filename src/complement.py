@@ -1,9 +1,17 @@
 #!/usr/bin/env python
-import sys
-
 _ref = {
-    'DNA': {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C', 'R': 'Y', 'Y': 'R'},
-    'RNA': {'A': 'U', 'U': 'A', 'C': 'G', 'G': 'C', 'R': 'Y', 'Y': 'R'}
+    'DNA': {
+        'A': 'T', 'T': 'A', 'a': 't', 't': 'a', 
+        'C': 'G', 'G': 'C', 'c': 'g', 'g': 'c',
+        'R': 'Y', 'Y': 'R', 'r': 'y', 'y': 'r',
+        ' ': ' ', '-': '-'
+    },
+    'RNA': {
+        'A': 'U', 'U': 'A', 'a': 'u', 'u': 'a',
+        'C': 'G', 'G': 'C', 'c': 'g', 'g': 'c',
+        'R': 'Y', 'Y': 'R', 'r': 'y', 'y': 'r',
+        ' ': ' ', '-': '-'
+    }
 }
 
 
@@ -14,15 +22,17 @@ def complement(s):
     `Sequence`s or strings.
     '''
 
-    if set(s) - set('ATUCGNRY'):
+    if set(s) - set('ATUCGNRYatucgnry- '):
         return s
-    if 'U' in s and 'T' not in s:
+    has_u = ('U' in s or 'u' in s)
+    has_t = ('T' in s or 't' in s)
+    if has_u and not has_t:
         repl = _ref['RNA']
-    elif 'T' in s and 'U' not in s:
+    elif has_t and not has_u:
         repl = _ref['DNA']
     else:
         repl = _ref['DNA']
-    value = ''.join(repl.get(c, 'N') for c in s.upper())
+    value = ''.join(repl.get(c, 'N') for c in s)
     try:
         return s.__class__("complement(%s)" % s.name, value,
                            original=s.original, start=s.start,
@@ -34,4 +44,4 @@ def complement(s):
 if __name__ == '__main__':
     assert complement('ATCGTAGCTGATCGAT') == 'TAGCATCGACTAGCTA'
     assert complement('AUCGUAGCUGAUCGAU') == 'UAGCAUCGACUAGCUA'
-    assert complement('ATCGUAGCUGAUCGAU') == 'ATCGUAGCUGAUCGAU'
+    print complement('AUCgu--cuGAUCGAU') 
