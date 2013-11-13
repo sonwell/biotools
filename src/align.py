@@ -127,34 +127,31 @@ def OptimalCTether(reference, translation, extend=1, create=10):
                     [mat[i][j + 1] - extend - gpc[i][j + 1], HGAP_MARK]]
             mat[i + 1][j + 1], pnt[i + 1][j + 1] = max(vals)
             gpc[i + 1][j + 1] = create * int(pnt[i + 1][j + 1] == DIAG_MARK)
-            if w[j] in starts:
-                if (optimal[0] is None or mat[i + 1][j + 1] > optimal[0]) and \
-                        abs(lv - i) / float(lv) <= options.LENGTH_ERR:
-                    optimal = [mat[i + 1][j + 1], i + 1, j + 1]
+            if (optimal[0] is None or mat[i + 1][j + 1] > optimal[0]) and \
+                    abs(lv - i) / float(lv) <= options.LENGTH_ERR and \
+                    w[j] in starts:
+                optimal = [mat[i + 1][j + 1], i + 1, j + 1]
 
     i, j = optimal[1], optimal[2]
     seq, ids = ['', ''], 0
     gapcount, length, sublen = 0, 0, 0
+    methods = {
+        VGAP_MARK:
+            lambda s, i, j, l, g, n:
+                (['-' + s[0], w[j - 1] + s[1]], i, j - 1, l + 1, g + 1, n),
+        DIAG_MARK:
+            lambda s, i, j, l, g, n:
+                ([v[i - 1] + s[0], w[j - 1] + s[1]], i - 1, j - 1,
+                 l + 1, g, n + (w[j - 1] == v[i - 1])),
+        HGAP_MARK:
+            lambda s, i, j, l, g, n:
+                ([v[i - 1] + s[0], '-' + s[1]], i - 1, j, l, g + 1, n)
+    }
+
     while [i, j] != [0, 0]:
         length += 1
-        direction = pnt[i][j]
-        if direction == VGAP_MARK:
-            seq = ['-' + seq[0], w[j - 1] + seq[1]]
-            j -= 1
-            sublen += 1
-            gapcount += 1
-        elif direction == DIAG_MARK:
-            seq = [v[i - 1] + seq[0], w[j - 1] + seq[1]]
-            i -= 1
-            j -= 1
-            sublen += 1
-            ids += int(w[j - 1] == v[i - 1])
-        elif direction == HGAP_MARK:
-            seq = [v[i - 1] + seq[0], '-' + seq[1]]
-            i -= 1
-            gapcount += 1
-        else:
-            break
+        state = (seq, i, j, sublen, gapcount, ids)
+        seq, i, j, sublen, gapcount, ids = methods[pnt[i][j]](*state)
 
     return {
         'subject': seq[0][::-1],

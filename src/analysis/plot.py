@@ -116,7 +116,7 @@ def models(starts, ends, counts, bound, ax, **kwargs):
 
 
 def report(filename, ntvar, aavar, lnt, laa):
-    print '=============', filename, '============='
-    print 'Average variance: '
-    print '\t', sum(ntvar) / lnt, 'per base pair'
-    print '\t', sum(aavar) / laa, 'per amino acid'
+    print(filename.center(80, '='))
+    print('Average variance: ')
+    print('\t%f per base pair' % (sum(ntvar) / lnt))
+    print('\t%f per amino acid' % (sum(aavar) / laa))

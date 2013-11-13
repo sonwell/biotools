@@ -77,7 +77,6 @@ def run(direc, inputs):
                 pass
 
     for ipt in inputs:
-        print "loadin' up from", ipt
         seqs = {}
         ids[ipt] = set()
         for seq in io.open(ipt, 'r'):
@@ -90,9 +89,7 @@ def run(direc, inputs):
         del seqs
 
     sub_ids = []
-    print "we have this many sequences:",
     while all_ids:
-        print len(all_ids)
         cid = all_ids.pop()
         subcluster = (all_ids | set([cid])) & \
             set(i for ipt in clusters for cluster in clusters[ipt]
@@ -104,7 +101,6 @@ def run(direc, inputs):
                     subcluster = (subcluster & cluster[0]) | \
                         (subcluster - ids[ipt])
         sub_ids.append(subcluster)
-        print "%d - %d =" % (len(all_ids) + 1, len(subcluster)), 
         all_ids -= subcluster
 
     for cid in sub_ids:

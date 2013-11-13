@@ -46,4 +46,4 @@ def complement(s):
 if __name__ == '__main__':
     assert complement('ATCGTAGCTGATCGAT') == 'TAGCATCGACTAGCTA'
     assert complement('AUCGUAGCUGAUCGAU') == 'UAGCAUCGACUAGCUA'
-    print complement('AUCgu--cuGAUCGAU') 
+    print(complement('AUCgu--cuGAUCGAU'))

@@ -217,8 +217,10 @@ def run(subject, query, prefix, names):
 
 
 if __name__ == '__main__':
+    options.START_CODONS = ['TTG']
+    import sys
     f = io.open(sys.argv[1], 'r')
     for seq in f:
-        print seq.name, seq.defline
+        print(seq.name + ' ' +  seq.defline)
         for orf in ORFGenerator(seq):
-            print orf.start , '...', orf.end
+            print('%d ... %d' % (orf.start, orf.end))

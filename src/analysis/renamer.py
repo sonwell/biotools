@@ -2,6 +2,11 @@ from os import sep, rename as mv
 import biotools.IO as io
 import biotools.analysis.options as options
 
+try:
+    get_input = raw_input
+except:
+    get_input = input
+
 
 def rename(db, files):
     '''
@@ -14,17 +19,17 @@ def rename(db, files):
     for f in files:
         seq = io.open(f, 'r').next()
         ids = seq.defline.split(', ')
-        print "File\033[33;1m", f, \
-              "\033[0mis described by the following sequences:"
+        print("File\033[33;1m", f, \
+              "\033[0mis described by the following sequences:")
         try:
             for id in ids:
                 seqdb[id]
-                print "*", seqdb[id].name + ':', \
-                      seqdb[id].defline.split('[')[0]
+                print("* " + seqdb[id].name + ': ' +
+                      seqdb[id].defline.split('[')[0])
         except KeyError:
-            print "* (none)"
+            print("* (none)")
             continue
-        pre = raw_input("\033[33;1mWhat should we call this file " +
+        pre = get_input("\033[33;1mWhat should we call this file " +
                         "(or hit enter to skip)? \033[0m")
         fpre = f[:f.find('.')]
 
@@ -40,7 +45,7 @@ def rename(db, files):
                 except IOError:
                     nt_old, nt_new = nt_dir + fpre, nt_dir + rpre
                     aa_old, aa_new = aa_dir + fpre, aa_dir + rpre
-                    print "Renaming " + fpre + ".* to " + rpre + ".*"
+                    print("Renaming " + fpre + ".* to " + rpre + ".*")
                     try:
                         mv(nt_old + ".fasta", nt_new + ".fasta")
                         mv(aa_old + ".fasta", aa_new + ".fasta")

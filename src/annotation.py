@@ -23,12 +23,12 @@ class Annotation(object):
         Annotation(*line.split('\\t'))  #(splitting on tabs)
         ```
 
-        and the rest of the work will be done for you. Other sources may 
+        and the rest of the work will be done for you. Other sources may
         require changes to `name_tokens` and `gff_token`.
 
         Instantiating an `Annotation` will generate for it an id of the form
-        *SEQNAME*_*TYPE*[START:END], where *SEQNAME* is the name of the 
-        sequence (column 1) from the GFF file, and type is like 'gene' or 
+        *SEQNAME*_*TYPE*[START:END], where *SEQNAME* is the name of the
+        sequence (column 1) from the GFF file, and type is like 'gene' or
         'CDS'. If no *SEQNAME* is provided, then `X` be used in its place, and
         if no identifier can be found in the attributes, the `Annotation` will
         generate an identifier for itself in the form of `unknown #`.
@@ -36,22 +36,25 @@ class Annotation(object):
 
         def parse_attrs(attr, keyvalsep='=', attrsep=';'):
             '''
-            Creates a dictionary from the atrributes (9th column) of a gff 
-            file. By default, key-value separator (`keyvalsep`) is `=`, which 
+            Creates a dictionary from the atrributes (9th column) of a gff
+            file. By default, key-value separator (`keyvalsep`) is `=`, which
             is the separator used in gff version 3.
 
-            In other words, `attr` `"a=b;c=d;"` and `keyvalsep` `=` will 
-            yield the dictionary `{'a':'b','c':'d'}`. The other separator 
-            (`attrsep`) separates individual attributes and defaults to ';', 
+            In other words, `attr` `"a=b;c=d;"` and `keyvalsep` `=` will
+            yield the dictionary `{'a':'b','c':'d'}`. The other separator
+            (`attrsep`) separates individual attributes and defaults to ';',
             which is also the norm in GFF files.
             '''
 
             attributes = {}
+            if keyvalsep not in attr:
+                keyvalsep = ' '
+            l = len(keyvalsep)
             attrs = [a.strip() for a in attr.strip().split(attrsep)]
             for attribute in attrs:
                 pos = attribute.find(keyvalsep)
                 if pos > -1:
-                    var, val = attribute[:pos], attribute[pos + 1:]
+                    var, val = attribute[:pos], attribute[pos + l:]
                     attributes[var] = attributes.get(var, []) + [val]
 
             for key in attributes:

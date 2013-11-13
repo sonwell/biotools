@@ -164,22 +164,31 @@ class Result(object):
         try:
             ipt = open(self.file, 'r')
         except (IOError, TypeError):
-            ipt = self.file
+            try:
+                ipt = self.file.split('\n')
+            except:
+                ipt = self.file
         mode = 0
         headers = []
         curr = None
         length = 0
 
         def sh(sn, qn, l):
+            qdl = ''
+            space = qn.find(' ')
+            if space > -1:
+                qn, qdl = qn[:space], qn[space + 1:].lstrip()
             return {
                 'subject': {
-                    'name':  sn,
+                    'name':  sn.lstrip(),
+                    'defline': '',
                     'start': None,
                     'end':   None,
                     'sequence': ''
                 },
                 'query': {
-                    'name':  qn.split()[0],
+                    'name':  qn,
+                    'defline': qdl,
                     'start': None,
                     'end':   None,
                     'sequence': ''
@@ -195,12 +204,13 @@ class Result(object):
             return sh
 
         def sh_fmt(l):
-            for pairs in (a.strip() for a in line.split(',')):
-                l, r = tuple(a.strip() for a in pairs.split('=')[:2])
+            for pairs in (a.strip() for a in l.split(',')):
+                l, r = tuple(a.strip() for a in (pairs.split('=')[:2]
+                             if '=' in pairs else pairs.split(':')[:2]))
                 subheaders[l.lower().split('(')[0]] = r
 
         for line in ipt:
-            line = line.strip()
+            line = line.rstrip('\n').lstrip()
             if not line:
                 if mode == 4:
                     mode = 5
@@ -209,7 +219,7 @@ class Result(object):
             if mode == 0:
                 if line[:6] == 'Query=':
                     mode = 1
-                    qname = line[6:].strip()
+                    qname = line[6:].lstrip()
                     self.headers = headers
                 else:
                     headers.append(line)
@@ -225,7 +235,7 @@ class Result(object):
                     length = int(''.join(line[1:-8].strip().split(',')))
                     mode = 2
                 elif line[:6] == 'Query=':
-                    qname = line[6:].strip()
+                    qname = line[6:].lstrip()
                 else:
                     qname += line
 
@@ -234,15 +244,24 @@ class Result(object):
                     mode = 3
                     subheaders = sh(line[1:], qname, length)
                 elif line[:6] == 'Query=':
-                    qname = line[6:].strip()
+                    qname = line[6:].lstrip()
                     mode = 1
 
             elif mode == 3:
                 if line[:5] == 'Score':
-                    snm = subheaders['subject']['name'].split()[0]
+                    snm = subheaders['subject']['name']
+                    defline = ''
+                    space = snm.find(' ')
+                    if space > -1:
+                        snm, defline = snm[:space], snm[space + 1:]
                     subheaders['subject']['name'] = snm
+                    subheaders['subject']['defline'] = defline
                     sh_fmt(line)
                     mode = 4
+                elif line[:7] == 'Length=':
+                    pass
+                elif line[0] == '(' and line.endswith('letters)'):
+                    pass
                 else:
                     subheaders['subject']['name'] += line
 
@@ -252,7 +271,7 @@ class Result(object):
             elif mode == 5:
                 if line[:6] == 'Query=':
                     mode = 1
-                    qname = line[6:].strip().split()[0]
+                    qname = line[6:].lstrip()
                     yield ra(subheaders)
                     continue
                 elif line[0] == '>':
@@ -277,7 +296,7 @@ class Result(object):
                 _, start, seq, end = line.split()
                 subheaders[curr]['start'] = subheaders[curr]['start'] or start
                 subheaders[curr]['end'] = end
-                subheaders[curr]['sequence'] += seq.upper()
+                subheaders[curr]['sequence'] += seq
 
         try:
             yield ra(subheaders)
@@ -286,49 +305,9 @@ class Result(object):
         raise StopIteration()
 
 if __name__ == '__main__':
-    output = '''
-BLASTN 2.2.25+
+    import sys
 
-
-Reference: Zheng Zhang, Scott Schwartz, Lukas Wagner, and Webb
-Miller (2000), "A greedy algorithm for aligning DNA sequences", J
-Comput Biol 2000; 7(1-2):203-14.
-
-
-
-Database: musa_pseudochromosome_RM.fa
-           12 sequences; 472,960,417 total letters
-
-
-
-Query= OsMADS57_AGL17
-Length=687
-
-
-***** No hits found *****
-
-
-
-Lambda     K      H
-    1.33    0.621     1.12 
-
-Gapped
-Lambda     K      H
-    1.28    0.460    0.850 
-
-Effective search space used: 311680693379
-
-
-  Database: musa_pseudochromosome_RM.fa
-    Posted date:  Aug 6, 2012  1:09 PM
-  Number of letters in database: 472,960,417
-  Number of sequences in database:  12
-
-
-
-Matrix: blastn matrix 1 -2
-Gap Penalties: Existence: 0, Extension: 2.5
-'''
-
-    for result in Result(output):
-        print result
+    if len(sys.argv) > 1:
+        output = open(sys.argv[1]).read()
+        for result in Result(output):
+            print(result)

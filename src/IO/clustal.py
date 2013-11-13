@@ -21,7 +21,7 @@ def read(fh):
 
     seqs = {}
     for line in fh:
-        if line.starts(' '):
+        if line.startswith(' '):
             continue
         st = line.strip()
         if st:

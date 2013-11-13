@@ -53,5 +53,5 @@ def translate(sequence):
 
 
 if __name__ == '__main__':
-    print translate('ATGTAA')
-    print translate('AUGUAA')
+    import sys
+    print(translate(sys.argv[1]))
