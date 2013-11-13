@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+
+# 1. predict
+# 2. cluster
+# 3. rename
+# 4. snps
+
+import biotools.analysis.run as pr
+import biotools.analysis.cluster as cw
+import biotools.analysis.renamer as mv
+import biotools.analysis.variance as cs
+import biotools.analysis.options as op
+import biotools.analysis.loaddata as ld
+import sys
+import os
+
+
+if __name__ == "__main__":
+    op.parse(sys.argv[1:])
+    if len(op.args) < 2:
+        op.help()
+        exit(0)
+
+    direc = op.DIRECTORY
+    plotter = op.PLOTTER
+    database = op.args[0]
+    names = op.args[1:]
+    sep = os.sep
+
+    predict = op.predicting
+    cluster = op.clustering
+    rename = op.renaming
+    plot = op.plotting
+    report = op.reporting
+    calculate = op.calculating
+
+    rename = rename and (cluster or not predict)
+    calculate = calculate and (cluster or not predict)
+    plot = plot and (calculate or not (predict or cluster))
+    report = report and calculate
+
+    if not (predict or cluster or rename or calculate or plot or report):
+        print "I don't know what you want, I give up."
+        exit(0)
+
+    if predict:
+        names = pr.run(database, names)
+        print "Homologous sequences written to " + direc + 'sequences' + sep
+
+    if cluster:
+        names = cw.run(direc + 'clusters' + sep, names)
+        print "Clustalw files written to " + direc + "clusters" + sep
+
+    if rename:
+        names = mv.rename(direc + 'clusters' + sep, database, names)
+
+    if plot and plotter.lower() != 'none':
+        try:
+            cv = __import__(plotter, globals(), locals(), ['plot'], -1)
+        except ImportError:
+            try:
+                if not plotter.endswith('.py'):
+                    plotter += '.py'
+                open(plotter, 'r')
+            except:
+                plot = False
+            else:
+                p = plotter.rfind(sep)
+                if p > -1:
+                    sys.path.append(plotter[:p])
+                plotter = plotter[p + len(sep):]
+
+                try:
+                    cv = __import__(plotter, globals(), locals(), ['plot'], -1)
+                except ImportError:
+                    plot = False
+
+    if calculate:
+        gen = cs.var(names)
+    elif plot:
+        gen = (ld.parse(s) for s in names)
+    else:
+        gen = []
+    for entry in gen:
+        plotdata = entry['plotdata']
+        metadata = entry['metadata']
+        if plot:
+            try:
+                cv.plot(plotdata, direc + 'plots' + sep,
+                        filename=metadata['filename'])
+            except Exception as e:
+                print metadata['filename'], e
+        if report:
+            try:
+                os.mkdir(direc + 'data' + sep)
+            except:
+                pass
+
+            fh = open(direc + 'data' + sep + metadata['strain'] + '.py', 'w')
+            fh.write('plotdata = ' + repr(plotdata) + '\n')
+            fh.write('metadata = ' + repr(metadata) + '\n')
+    print "Done"
