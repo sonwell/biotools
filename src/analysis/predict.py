@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 import biotools.IO as io
-import biotools.annotation as anno
 import biotools.BLAST as BLAST
 import biotools.analysis.options as options
 from biotools.sequence import Sequence, annotation as ann
 from biotools.align import OptimalCTether as align
-from biotools.translate import *
-from biotools.complement import *
+from biotools.translate import translate
+from biotools.complement import complement
 try:
     import Queue as queue
 except ImportError:
@@ -114,7 +113,6 @@ def GeneFromBLAST(db, sequences, pref, names):
                 subject = translate(subj[sname])
             else:
                 subject = subj[sname]
-            length = len(subject) * 3
 
             while qname:
                 try:
@@ -149,9 +147,9 @@ def GeneFromBLAST(db, sequences, pref, names):
                 defline = '%s[source=%s] [start=%d] [end=%d] [strand=%d]' % \
                     (odl + (' ' if odl else ''), src, start, end, strand)
 
-                new =Sequence(name.strip(), seq.seq, defline=defline,
-                              original=seq.original, type=seq.type,
-                              start=seq.start, end=seq.end, step=seq.step)
+                new = Sequence(name.strip(), seq.seq, defline=defline,
+                               original=seq.original, type=seq.type,
+                               start=seq.start, end=seq.end, step=seq.step)
                 qout.put(new)
             qin.task_done()
 
@@ -189,19 +187,25 @@ def GeneFromBLAST(db, sequences, pref, names):
 
     target()
     qin.join()
+    options.debug("Done Aligning sequences.")
 
+    options.debug("Now writing sequences (%d)." % qout.qsize())
     seqs = {}
     nuc_file = io.open(wd + pref + '.fasta', 'w')
-    while not qout.empty():
+    count = 0
+    while 1:
         try:
             seq = qout.get(False)
             if seq.seq not in seqs:
                 seqs[seq.seq] = set()
             seqs[seq.seq].add(seq)
             nuc_file.write(seq)
+            count += 1
+            options.debug("Wrote %s (%d)." % (seq.name, count));
         except queue.Empty:
             break
     nuc_file.close()
+    options.debug("Done Aligning sequences.")
 
     gh = io.open(wd + pref + '.gff3', 'w')
     names.append(wd + pref + '.fasta')
@@ -221,6 +225,6 @@ if __name__ == '__main__':
     import sys
     f = io.open(sys.argv[1], 'r')
     for seq in f:
-        print(seq.name + ' ' +  seq.defline)
+        print(seq.name + ' ' + seq.defline)
         for orf in ORFGenerator(seq):
             print('%d ... %d' % (orf.start, orf.end))
