@@ -129,12 +129,9 @@ def run(db, sfile, mega_blast=False, **kwargs):
         cmd = "megablast"
         pn = ["-d", "-i"]
         allowed = ["e", "a"]
-
-    proc = subprocess.Popen([cmd, pn[0], db, pn[1], sfile] +
-                            [arg for pair in
-                             [["-" + k, str(kwargs[k])] for k in allowed]
-                             for arg in pair],
-                            bufsize=1, stdout=subprocess.PIPE)
+    args = [cmd, pn[0], db, pn[1], sfile] + [arg for pair in
+            [["-" + k, str(kwargs[k])] for k in allowed] for arg in pair]
+    proc = subprocess.Popen(args, bufsize=1, stdout=subprocess.PIPE)
     return Result(iter(proc.stdout.readline, ''))
 
 

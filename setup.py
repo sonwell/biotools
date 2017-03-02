@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name="biotools",
-      version='1.2.11',
+      version='1.2.13',
       description="A bunch of bioinformatics utilities.",
       long_description="""Accompanies Bart, Rebecca, *et al.* High-throughput genomic sequencing of Cassava Bacterial Blight strains identifies conserved effectors to target for durable resistance. *PNAS Plus*.
 
@@ -21,10 +21,11 @@ You can grab the most current code from `github <https://github.com/sonwell/biot
       package_dir={'biotools': 'src',
                    'biotools.analysis': 'src/analysis',
                    'biotools.IO': 'src/IO'},
-      scripts=['prok-geneseek'],
+      scripts=['prok-geneseek', 'grepseq'],
       keywords='gene prediction, prokaryotes, effectors',
       classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
-        'Topic :: Scientific/Engineering :: Bio-Informatics'
+        'Topic :: Scientific/Engineering :: Bio-Informatics',
+        'License :: OSI Approved :: BSD License'
       ])

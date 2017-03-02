@@ -1,20 +1,13 @@
+from __future__ import print_function
 import matplotlib.pyplot as plt
-import biotools.analysis.plot as bap
-from os import sep, mkdir
-
-
-# report areas of high conservation or variation
-def report(plotdata, **kwargs):
-    pass
+from biotools.analysis.plot import smoothed
+from os import mkdir
 
 
 # wraps biotools.analysis.plot.plot()
 def plot(plotdata, directory, bottom=True, side=True, legend=True,
          save=True, filename='untitled.pdf', upperbound=0.05, factor=21,
          fig=plt.figure(None, facecolor='w', edgecolor='w'), **kwargs):
-
-    ranges = report(plotdata, **kwargs)
-
     try:
         mkdir(directory)
     except OSError:
@@ -23,10 +16,10 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True,
     lowerbound = -upperbound / 6
 
     # smooth the data
-    snt = smoothed(snpdata['nt']['var'], factor)
-    lnt = len(snpdata['nt']['var'])
-    saa = smoothed(snpdata['aa']['var'], factor)
-    laa = len(snpdata['aa']['var'])
+    snt = smoothed(plotdata['nt']['var'], factor)
+    lnt = len(plotdata['nt']['var'])
+    saa = smoothed(plotdata['aa']['var'], factor)
+    laa = len(plotdata['aa']['var'])
 
     # generate x-ranges so that amino acids
     # and nucleotides align
@@ -67,15 +60,15 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True,
     nt_lines = ax.plot(xnt, snt, color='#0000ff', linestyle='solid')
     aa_lines = ax.plot(xaa, saa, color='#00ff00', linestyle='solid')
 
-    starts = snpdata['aa']['starts']
-    ends = snpdata['aa']['ends']
-    counts = snpdata['aa']['count']
+    starts = plotdata['aa']['starts']
+    ends = plotdata['aa']['ends']
+    counts = plotdata['aa']['count']
     scale = laa / max(ends)
     ys = (np.arange(len(starts)) + 1) * lowerbound / 3
 
     ax.hlines(ys, starts, ends, colors='k', lw=4, linestyle='solid')
-    for i, c in zip(xrange(len(counts)), counts):
-        ax.text(laa + 10, lowerbound / 3 * (i + 1.25), c)
+    for i, c in enumerate(counts):
+        ax.text(laa + 10, lowerbound / 3 * (i + 0.25), c)
     if legend:
         fig.legend((nt_lines, aa_lines), ('Nucleotide', 'Amino acid'),
                    'upper right')
@@ -83,7 +76,7 @@ def plot(plotdata, directory, bottom=True, side=True, legend=True,
     if save:
         fig.savefig(directory + filename)
 
-    print '=============', filename, '============='
-    print 'Average variance: '
-    print '\t', sum(snpdata['nt']['var']) / lnt, 'per base pair'
-    print '\t', sum(snpdata['aa']['var']) / laa, 'per amino acid'
+    print('=============', filename, '=============')
+    print('Average variance: ')
+    print('\t', sum(plotdata['nt']['var']) / lnt, 'per base pair')
+    print('\t', sum(plotdata['aa']['var']) / laa, 'per amino acid')
